@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">CQ</string>
+
+    <string name="edit_message">Recipient telephone number</string>
+    <string name="button_send">Send</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_display_message">My Message</string>
+    <string name="button_copy_url">Copy URL to clipboard</string>
+    <string name="button_pick_contact">Choose a contact</string>
+    <string name="button_send_message">Send SMS</string>
+</resources>
