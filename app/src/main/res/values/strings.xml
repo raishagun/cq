@@ -8,4 +8,9 @@
     <string name="button_copy_url">Copy URL to clipboard</string>
     <string name="button_pick_contact">Choose a contact</string>
     <string name="button_send_message">Send SMS</string>
+    <string name="location_unavailable"><i>Location unavailable!</i></string>
+    <string name="location_disabled_alert_title">CQ needs to know your location!</string>
+    <string name="location_disabled_alert_message">To use CQ, please go to Settings on your device and enable location services.</string>
+    <string name="location_disabled_alert_dismiss_button">OK</string>
+
 </resources>

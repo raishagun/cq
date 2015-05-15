@@ -11,9 +11,7 @@ public class Message {
     protected String mMapUrl;
     protected String mMessageText;
 
-    protected Message(Location mostRecentLocation) {
-        update(mostRecentLocation);
-    }
+    protected Message() { }
 
     protected void update(Location mostRecentLocation) {
         // Get accuracy
