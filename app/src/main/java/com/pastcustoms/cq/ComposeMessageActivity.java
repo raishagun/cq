@@ -52,9 +52,9 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected boolean mRequestingLocationUpdates = true;
     protected TextView mRecipientPhoneNo;
     protected TextView mSmsMessage;
-    protected Button mCopyUrlButton;
+    //protected Button mCopyUrlButton;
     protected Button mPickContactButton;
-    protected Button mToggleUpdatesButton;
+    //protected Button mToggleUpdatesButton;
     protected Button mSendMessageButton;
     protected Message mMessage = new Message();
 
@@ -121,15 +121,15 @@ public class ComposeMessageActivity extends ActionBarActivity
     private void disableUi() {
         mUiDisabled = true;
         mSmsMessage.setText(getText(R.string.location_unavailable));
-        mCopyUrlButton.setEnabled(false);
-        mToggleUpdatesButton.setEnabled(false);
+        //mCopyUrlButton.setEnabled(false);
+        //mToggleUpdatesButton.setEnabled(false);
         mSendMessageButton.setEnabled(false);
     }
 
     private void enableUi() {
         mUiDisabled = false;
-        mCopyUrlButton.setEnabled(true);
-        mToggleUpdatesButton.setEnabled(true);
+       // mCopyUrlButton.setEnabled(true);
+        //mToggleUpdatesButton.setEnabled(true);
         mSendMessageButton.setEnabled(true);
     }
 
@@ -292,17 +292,19 @@ public class ComposeMessageActivity extends ActionBarActivity
         MenuItem resumeUpdates = menu.findItem(R.id.menu_resume_location_updates);
         MenuItem pauseUpdates = menu.findItem(R.id.menu_pause_location_updates);
 
-        if (mRequestingLocationUpdates) {
+        if (mUiDisabled){
+            // Hide both buttons if UI disabled
+            resumeUpdates.setVisible(false);
+            pauseUpdates.setVisible(false);
+        } else if (mRequestingLocationUpdates) {
             // Hide resume updates button if already updating
             resumeUpdates.setVisible(false);
             pauseUpdates.setVisible(true);
-
         } else {
             // Hide pause updates button if already paused
             resumeUpdates.setVisible(true);
             pauseUpdates.setVisible(false);
         }
-
         return true;
     }
 
@@ -318,10 +320,12 @@ public class ComposeMessageActivity extends ActionBarActivity
         if (id == R.id.menu_pause_location_updates) {
             stopLocationUpdates();
             mRequestingLocationUpdates = false;
+            Toast.makeText(this, "Location updates are now paused", Toast.LENGTH_LONG).show();
             return true;
         } else if (id == R.id.menu_resume_location_updates) {
             startLocationUpdates();
             mRequestingLocationUpdates = true;
+            Toast.makeText(this, "Updating your location", Toast.LENGTH_LONG).show();
             return true;
         } else if (id == R.id.menu_about) {
             //TODO: create a new simple dialog box and pass info strings to it

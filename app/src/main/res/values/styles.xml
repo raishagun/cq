@@ -6,6 +6,10 @@
 
         <!-- Support library compatibility -->
         <item name="actionBarStyle">@style/MyActionBar</item>
+
+        <item name="colorControlNormal">@color/primary</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="colorControlHighlight">@color/accent</item>
     </style>
 
     <!-- ActionBar styles -->
@@ -16,6 +20,8 @@
         <!-- Support library compatibility -->
         <item name="background">@color/dark_primary</item>
     </style>
+
+
 
 
 </resources>

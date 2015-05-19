@@ -8,7 +8,9 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <TextView
             android:id="@+id/header_text"
@@ -17,7 +19,7 @@
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
             android:text="Send to:"
-            android:textSize="@dimen/abc_text_size_headline_material"
+            android:textSize="@dimen/abc_text_size_large_material"
             android:textColor="@color/primary_text"/>
 
         <LinearLayout
@@ -53,7 +55,7 @@
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
             android:text="Message:"
-            android:textSize="@dimen/abc_text_size_headline_material"
+            android:textSize="@dimen/abc_text_size_large_material"
             android:textColor="@color/primary_text"/>
 
 
@@ -63,10 +65,14 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:autoLink="all"
-            android:background="#CCDDDD"
+            android:background="#ffffffff"
             android:padding="10dp"
+            android:textSize="18sp"
+            android:textColor="@color/primary_text"
+            android:textColorLink="@color/accent"
             android:textIsSelectable="true"
-            android:textSize="18sp" />
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -88,8 +94,8 @@
                 android:layout_height="wrap_content"
                 android:onClick="sendLocationSMS"
                 android:text="@string/button_send_message"
-                android:textStyle="bold"
-                android:layout_alignParentRight="true"/>
+                android:layout_alignParentRight="true"
+                android:textStyle="bold" />
 
         </RelativeLayout>
 
