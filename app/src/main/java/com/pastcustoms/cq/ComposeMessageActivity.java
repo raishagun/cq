@@ -395,10 +395,11 @@ public class ComposeMessageActivity extends ActionBarActivity
         } else if (phoneNumberInvalid) {
             Toast.makeText(this, "Error: please enter a valid phone number", Toast.LENGTH_LONG).show();
         } else {
+            Toast.makeText(this, messageText, Toast.LENGTH_LONG).show();
             // Send message
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNumber, null, messageText, null, null);
-            Toast.makeText(this, "Message sent", Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "Message sent", Toast.LENGTH_LONG).show();
         }
         return;
     }
