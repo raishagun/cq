@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
