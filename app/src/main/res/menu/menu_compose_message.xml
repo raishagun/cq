@@ -1,6 +1,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".ComposeMessageActivity">
+    <!--
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
+        -->
+    <item android:id="@+id/menu_pause_location_updates" android:title="@string/menu_pause_location_updates"
+        android:orderInCategory="1" app:showAsAction="never" />
+    <item android:id="@+id/menu_resume_location_updates" android:title="@string/menu_resume_location_updates"
+        android:orderInCategory="2" app:showAsAction="never" />
+    <item android:id="@+id/menu_copy_url" android:title="@string/menu_copy_url"
+        android:orderInCategory="3" app:showAsAction="never" />
+    <item android:id="@+id/menu_about" android:title="@string/menu_about"
+        android:orderInCategory="4" app:showAsAction="never" />
 </menu>

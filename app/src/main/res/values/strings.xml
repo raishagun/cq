@@ -6,11 +6,17 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_display_message">My Message</string>
     <string name="button_copy_url">Copy URL to clipboard</string>
-    <string name="button_pick_contact">Choose a contact</string>
+    <string name="button_pick_contact">Choose contact</string>
     <string name="button_send_message">Send SMS</string>
     <string name="location_unavailable"><i>Location unavailable!</i></string>
     <string name="location_disabled_alert_title">CQ needs to know your location!</string>
     <string name="location_disabled_alert_message">To use CQ, please go to Settings on your device and enable location services.</string>
     <string name="location_disabled_alert_dismiss_button">OK</string>
+    <string name="menu_pause_location_updates">Pause location updates</string>
+    <string name="menu_resume_location_updates">Resume location updates</string>
+    <string name="menu_copy_url">Copy URL to clipboard</string>
+    <string name="menu_about">About CQ</string>
+
+
 
 </resources>

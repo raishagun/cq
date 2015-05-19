@@ -1,6 +1,7 @@
 package com.pastcustoms.cq;
 
 // TODO: add copyright statement
+
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -17,7 +18,6 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
@@ -65,14 +65,16 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         mPickContactButton = (Button) findViewById(R.id.pick_contact_button);
         mSendMessageButton = (Button) findViewById(R.id.send_message_button);
-        mToggleUpdatesButton = (ToggleButton) findViewById(R.id.update_location_toggle);
+        //mToggleUpdatesButton = (ToggleButton) findViewById(R.id.update_location_toggle);
         mRecipientPhoneNo = (TextView) findViewById(R.id.phone_no);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
 
-        // Create "Copy URL to clipboard" button if device supports this (SDK version 11 or higher)
-        if (Build.VERSION.SDK_INT >= 11) {
-            mCopyUrlButton = (Button) findViewById(R.id.copy_url_button);
-        }
+        /**
+         // Create "Copy URL to clipboard" button if device supports this (SDK version 11 or higher)
+         if (Build.VERSION.SDK_INT >= 11) {
+         mCopyUrlButton = (Button) findViewById(R.id.copy_url_button);
+         }
+         **/
 
         buildGoogleApiClient();
     }
@@ -146,10 +148,11 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     /**
      * Checks if user has enabled location access.
+     *
      * @param context the current context.
      * @return true if location access is enabled, false if disabled.
      */
-    private boolean isLocationEnabled (Context context) {
+    private boolean isLocationEnabled(Context context) {
         // Begin by assuming that location is enabled.
         boolean isLocationEnabled = true;
 
@@ -175,7 +178,7 @@ public class ComposeMessageActivity extends ActionBarActivity
             }
         }
 
-        if (isLocationEnabled){
+        if (isLocationEnabled) {
             Log.d(TAG, "Location enabled");
         } else {
             Log.d(TAG, "Location disabled");
@@ -261,7 +264,7 @@ public class ComposeMessageActivity extends ActionBarActivity
             }
         }
 
-        if (locationEnabled && mUiDisabled){
+        if (locationEnabled && mUiDisabled) {
             enableUi();
         }
 
@@ -275,8 +278,34 @@ public class ComposeMessageActivity extends ActionBarActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_compose_message, menu);
+
+        // Hide "Copy URL to clipboard" menu option if device does not support copying to clipboard
+        if (Build.VERSION.SDK_INT < 11) {
+            MenuItem copyUrl = menu.findItem(R.id.menu_copy_url);
+            copyUrl.setVisible(false);
+        }
         return true;
     }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem resumeUpdates = menu.findItem(R.id.menu_resume_location_updates);
+        MenuItem pauseUpdates = menu.findItem(R.id.menu_pause_location_updates);
+
+        if (mRequestingLocationUpdates) {
+            // Hide resume updates button if already updating
+            resumeUpdates.setVisible(false);
+            pauseUpdates.setVisible(true);
+
+        } else {
+            // Hide pause updates button if already paused
+            resumeUpdates.setVisible(true);
+            pauseUpdates.setVisible(false);
+        }
+
+        return true;
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -286,7 +315,19 @@ public class ComposeMessageActivity extends ActionBarActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.menu_pause_location_updates) {
+            stopLocationUpdates();
+            mRequestingLocationUpdates = false;
+            return true;
+        } else if (id == R.id.menu_resume_location_updates) {
+            startLocationUpdates();
+            mRequestingLocationUpdates = true;
+            return true;
+        } else if (id == R.id.menu_about) {
+            //TODO: create a new simple dialog box and pass info strings to it
+            return true;
+        } else if (id == R.id.menu_copy_url) {
+            copyUrl();
             return true;
         }
 
@@ -305,7 +346,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     }
 
     @TargetApi(11)
-    public void copyUrl(View view) {
+    public void copyUrl() {
         String mapUrl = mMessage.mMapUrl;
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("My location", mapUrl);
