@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -53,7 +54,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected TextView mRecipientPhoneNo;
     protected TextView mSmsMessage;
     //protected Button mCopyUrlButton;
-    protected Button mPickContactButton;
+    protected ImageButton mPickContactButton;
     //protected Button mToggleUpdatesButton;
     protected Button mSendMessageButton;
     protected Message mMessage = new Message();
@@ -63,7 +64,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose_message);
 
-        mPickContactButton = (Button) findViewById(R.id.pick_contact_button);
+        mPickContactButton = (ImageButton) findViewById(R.id.pick_contact_button);
         mSendMessageButton = (Button) findViewById(R.id.send_message_button);
         //mToggleUpdatesButton = (ToggleButton) findViewById(R.id.update_location_toggle);
         mRecipientPhoneNo = (TextView) findViewById(R.id.phone_no);
