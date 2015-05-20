@@ -7,7 +7,7 @@
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:focusable="true"
         android:focusableInTouchMode="true">
@@ -36,7 +36,8 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:ems="10"
-                android:inputType="phone" />
+                android:inputType="phone"
+                android:imeOptions="actionDone"/>
 <!--
             <Button
                 android:id="@+id/pick_contact_button"
@@ -51,7 +52,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/contactsbtn"
-                android:onClick="chooseContact"/>
+                android:onClick="chooseContact"
+                android:contentDescription="Choose a telephone number from your contacts." />
 
         </LinearLayout>
 

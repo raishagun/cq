@@ -292,19 +292,23 @@ public class ComposeMessageActivity extends ActionBarActivity
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem resumeUpdates = menu.findItem(R.id.menu_resume_location_updates);
         MenuItem pauseUpdates = menu.findItem(R.id.menu_pause_location_updates);
+        MenuItem copyUrl = menu.findItem(R.id.menu_copy_url);
 
         if (mUiDisabled){
             // Hide both buttons if UI disabled
             resumeUpdates.setVisible(false);
             pauseUpdates.setVisible(false);
+            copyUrl.setVisible(false);
         } else if (mRequestingLocationUpdates) {
             // Hide resume updates button if already updating
             resumeUpdates.setVisible(false);
             pauseUpdates.setVisible(true);
+            copyUrl.setVisible(true);
         } else {
             // Hide pause updates button if already paused
             resumeUpdates.setVisible(true);
             pauseUpdates.setVisible(false);
+            copyUrl.setVisible(true);
         }
         return true;
     }
