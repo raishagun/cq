@@ -14,9 +14,10 @@ public class SmsStatusReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent){
+
         String actionName = intent.getAction();
         String errorDialogMessage;
-        if (actionName == "com.pastcustoms.cq.SMS_SENT"){
+        if (actionName.equals("com.pastcustoms.cq.SMS_SENT")){
             switch(getResultCode()) {
                 case Activity.RESULT_OK:
                     Toast.makeText(context, "SMS sent", Toast.LENGTH_LONG).show();
@@ -31,7 +32,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
             }
         }
 
-        if (actionName == "com.pastcustoms.cq.SMS_DELIVERED") {
+        if (actionName.equals("com.pastcustoms.cq.SMS_DELIVERED")) {
             switch(getResultCode()) {
                 case Activity.RESULT_OK:
                     Toast.makeText(context, "SMS delivered", Toast.LENGTH_LONG).show();
