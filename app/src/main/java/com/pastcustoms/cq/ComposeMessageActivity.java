@@ -333,7 +333,7 @@ public class ComposeMessageActivity extends ActionBarActivity
             Toast.makeText(this, "Updating your location", Toast.LENGTH_LONG).show();
             return true;
         } else if (id == R.id.menu_about) {
-            //TODO: create a new simple dialog box and pass info strings to it
+            simpleAlertDialog("About CQ", "Version 1.0\nDeveloped by Scott Bassett, 2015\ncq.pastcustoms.com", "OK");
             return true;
         } else if (id == R.id.menu_copy_url) {
             copyUrl();
@@ -446,11 +446,10 @@ public class ComposeMessageActivity extends ActionBarActivity
         } else if (phoneNumberInvalid) {
             Toast.makeText(this, "Error: please enter a valid phone number", Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(this, messageText, Toast.LENGTH_LONG).show();
             // Send message
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNumber, null, messageText, null, null);
-            //Toast.makeText(this, "Message sent", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Sending message", Toast.LENGTH_LONG).show();
         }
         return;
     }
