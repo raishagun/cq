@@ -23,11 +23,16 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-    </application>
 
+        <receiver android:name=".SmsStatusReceiver">
+            <intent-filter>
+                <action android:name="com.pastcustoms.cq.SMS_SENT"/>
+                <action android:name="com.pastcustoms.cq.SMS_DELIVERED"/>
+            </intent-filter>
+        </receiver>
+
+    </application>
 </manifest>

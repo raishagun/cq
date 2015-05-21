@@ -4,6 +4,7 @@ package com.pastcustoms.cq;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -53,9 +54,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected boolean mRequestingLocationUpdates = true;
     protected TextView mRecipientPhoneNo;
     protected TextView mSmsMessage;
-    //protected Button mCopyUrlButton;
     protected ImageButton mPickContactButton;
-    //protected Button mToggleUpdatesButton;
     protected Button mSendMessageButton;
     protected Message mMessage = new Message();
 
@@ -66,16 +65,8 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         mPickContactButton = (ImageButton) findViewById(R.id.pick_contact_button);
         mSendMessageButton = (Button) findViewById(R.id.send_message_button);
-        //mToggleUpdatesButton = (ToggleButton) findViewById(R.id.update_location_toggle);
         mRecipientPhoneNo = (TextView) findViewById(R.id.phone_no);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
-
-        /**
-         // Create "Copy URL to clipboard" button if device supports this (SDK version 11 or higher)
-         if (Build.VERSION.SDK_INT >= 11) {
-         mCopyUrlButton = (Button) findViewById(R.id.copy_url_button);
-         }
-         **/
 
         buildGoogleApiClient();
     }
@@ -122,15 +113,11 @@ public class ComposeMessageActivity extends ActionBarActivity
     private void disableUi() {
         mUiDisabled = true;
         mSmsMessage.setText(getText(R.string.location_unavailable));
-        //mCopyUrlButton.setEnabled(false);
-        //mToggleUpdatesButton.setEnabled(false);
         mSendMessageButton.setEnabled(false);
     }
 
     private void enableUi() {
         mUiDisabled = false;
-       // mCopyUrlButton.setEnabled(true);
-        //mToggleUpdatesButton.setEnabled(true);
         mSendMessageButton.setEnabled(true);
     }
 
@@ -154,7 +141,7 @@ public class ComposeMessageActivity extends ActionBarActivity
      * @return true if location access is enabled, false if disabled.
      */
     private boolean isLocationEnabled(Context context) {
-        // Begin by assuming that location is enabled.
+        // By default, assume that location services are enabled.
         boolean isLocationEnabled = true;
 
         // If device API level < 19, read system setting LOCATION_PROVIDERS_ALLOWED (deprecated).
@@ -165,8 +152,8 @@ public class ComposeMessageActivity extends ActionBarActivity
                 isLocationEnabled = false;
             }
         } else {
-            // If device API level >= 19, read system setting LOCATION_MODE.
-            // If LOCATION_MODE is 0, then user has disabled location services.
+            // If device API level >= 19, read system setting LOCATION_MODE to find out whether
+            // user has disabled location services.
             int locationMode;
             try {
                 locationMode = Settings.Secure.getInt(context.getContentResolver(),
@@ -179,6 +166,7 @@ public class ComposeMessageActivity extends ActionBarActivity
             }
         }
 
+        // For debugging
         if (isLocationEnabled) {
             Log.d(TAG, "Location enabled");
         } else {
@@ -295,17 +283,17 @@ public class ComposeMessageActivity extends ActionBarActivity
         MenuItem copyUrl = menu.findItem(R.id.menu_copy_url);
 
         if (mUiDisabled){
-            // Hide both buttons if UI disabled
+            // Hide both 'pause updates' and 'resume updates' buttons if UI disabled
             resumeUpdates.setVisible(false);
             pauseUpdates.setVisible(false);
             copyUrl.setVisible(false);
         } else if (mRequestingLocationUpdates) {
-            // Hide resume updates button if already updating
+            // Hide 'resume updates' button if already updating
             resumeUpdates.setVisible(false);
             pauseUpdates.setVisible(true);
             copyUrl.setVisible(true);
         } else {
-            // Hide pause updates button if already paused
+            // Hide 'pause updates' button if already paused
             resumeUpdates.setVisible(true);
             pauseUpdates.setVisible(false);
             copyUrl.setVisible(true);
@@ -316,12 +304,9 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        // TODO: change this to a switch statement for readability
         if (id == R.id.menu_pause_location_updates) {
             stopLocationUpdates();
             mRequestingLocationUpdates = false;
@@ -343,17 +328,6 @@ public class ComposeMessageActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void toggleUpdatesHandler(View view) {
-        boolean on = ((ToggleButton) view).isChecked();
-        if (on) {
-            startLocationUpdates();
-            mRequestingLocationUpdates = true;
-        } else {
-            stopLocationUpdates();
-            mRequestingLocationUpdates = false;
-        }
-    }
-
     @TargetApi(11)
     public void copyUrl() {
         String mapUrl = mMessage.mMapUrl;
@@ -370,7 +344,8 @@ public class ComposeMessageActivity extends ActionBarActivity
     // From tutorial
     private void pickContact() {
         Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
-        pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+        // Only show contacts with phone numbers
+        pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
         startActivityForResult(pickContactIntent, REQUEST_PICK_CONTACT);
     }
 
@@ -424,7 +399,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
-    public void sendLocationSMS(View view) {
+    public void sendLocationMessage(View view) {
         // Get phone number, Google Maps URL, and message to send via SMS
         String phoneNumber = mRecipientPhoneNo.getText().toString();
         String mapUrl = mMessage.mMapUrl;
@@ -447,11 +422,28 @@ public class ComposeMessageActivity extends ActionBarActivity
             Toast.makeText(this, "Error: please enter a valid phone number", Toast.LENGTH_LONG).show();
         } else {
             // Send message
-            SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(phoneNumber, null, messageText, null, null);
-            Toast.makeText(this, "Sending message", Toast.LENGTH_LONG).show();
+            sendSms(phoneNumber, messageText);
+            Toast.makeText(this, "Sending SMS...", Toast.LENGTH_SHORT).show();
         }
         return;
+    }
+
+    private void sendSms(String phoneNumber, String messageText) {
+
+        // Create intents
+        Intent smsSent = new Intent ("com.pastcustoms.cq.SMS_SENT");
+        Intent smsDelivery = new Intent ("com.pastcustoms.cq.SMS_DELIVERED");
+
+        // Create pending intents
+        PendingIntent smsSentIntent
+                = PendingIntent.getBroadcast(getBaseContext(), 0, smsSent, 0);
+        PendingIntent smsDeliveryIntent
+                = PendingIntent.getBroadcast(getBaseContext(), 0, smsDelivery, 0);
+
+        // Send SMS
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage(phoneNumber, null, messageText,
+                smsSentIntent, smsDeliveryIntent);
     }
 
 }
