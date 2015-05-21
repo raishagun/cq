@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
+import android.telephony.ServiceState;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
@@ -28,7 +29,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -399,7 +399,23 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
-    public void sendLocationMessage(View view) {
+    public void sendSmsBtnHandler(View view) {
+        /*
+        // Check if radio is on (i.e., not in flight mode)
+        ServiceState serviceState = new ServiceState();
+        int state = serviceState.getState();
+        Log.d(TAG, "Service state: " + state);
+        if (state == ServiceState.STATE_POWER_OFF || state == ServiceState.STATE_OUT_OF_SERVICE) {
+            simpleAlertDialog("Error", "SMS cannot be sent because your phone has no cell signal.\nPlease make sure that your phone is not in flight mode, and try again.", "OK");
+        } else {
+            // If radio is on, create a location sms
+            prepareLocationMessage();
+        }
+        */
+        prepareLocationMessage();
+    }
+
+    private void prepareLocationMessage(){
         // Get phone number, Google Maps URL, and message to send via SMS
         String phoneNumber = mRecipientPhoneNo.getText().toString();
         String mapUrl = mMessage.mMapUrl;
@@ -422,14 +438,15 @@ public class ComposeMessageActivity extends ActionBarActivity
             Toast.makeText(this, "Error: please enter a valid phone number", Toast.LENGTH_LONG).show();
         } else {
             // Send message
-            sendSms(phoneNumber, messageText);
+            sendLocationMessage(phoneNumber, messageText);
             Toast.makeText(this, "Sending SMS...", Toast.LENGTH_SHORT).show();
         }
         return;
     }
 
-    private void sendSms(String phoneNumber, String messageText) {
+    private void sendLocationMessage(String phoneNumber, String messageText) {
 
+        Log.d(TAG, "sending SMS");
         // Create intents
         Intent smsSent = new Intent ("com.pastcustoms.cq.SMS_SENT");
         Intent smsDelivery = new Intent ("com.pastcustoms.cq.SMS_DELIVERED");

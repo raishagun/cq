@@ -34,5 +34,11 @@
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".SmsErrorDialogActivity"
+            android:label="@string/title_Activity_Sms_Error_dialog"
+            android:theme="@android:style/Theme.NoDisplay">
+        </activity>
+
     </application>
 </manifest>

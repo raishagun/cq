@@ -23,7 +23,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
                     errorDialogMessage = "SMS was not sent! Please make sure that your phone is not in flight mode and try again.";
-                    errorDialog(context, errorDialogMessage);
+                    errorDialog(context.getApplicationContext(), errorDialogMessage);
                     break;
                 default:
                     errorDialogMessage = "SMS was not sent! Please try again.";
@@ -44,16 +44,9 @@ public class SmsStatusReceiver extends BroadcastReceiver {
     }
 
     private void errorDialog(Context context, String message) {
-        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-        alertDialog.setTitle("Error");
-        alertDialog.setMessage(message);
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int x) {
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.show();
+        Intent smsErrorDialogIntent = new Intent(context, SmsErrorDialogActivity.class);
+        smsErrorDialogIntent.putExtra("error_message", message);
+        smsErrorDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(smsErrorDialogIntent);
     }
-
 }

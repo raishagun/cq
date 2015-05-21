@@ -102,7 +102,7 @@
                 android:id="@+id/send_message_button"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:onClick="sendLocationMessage"
+                android:onClick="sendSmsBtnHandler"
                 android:text="@string/button_send_message"
                 android:layout_alignParentRight="false"
                 android:textStyle="bold"
