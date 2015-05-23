@@ -45,6 +45,8 @@ public class ComposeMessageActivity extends ActionBarActivity
     private static final String TAG = "CqApp";
     static final int REQUEST_PICK_CONTACT = 1;  // The request code
     static final int REQUEST_RESOLVE_CONNECTION_ERROR = 2; // Request code
+    static final int DESIRED_LOCATION_UPDATE_INTERVAL = 5000;
+    static final int FASTEST_LOCATION_UPDATE_INTERVAL = 1000;
     protected boolean mCurrentlyResolvingError = false;
     protected boolean mUiDisabled = false;
     protected boolean mHaveLastLocation = false;
@@ -82,8 +84,8 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(5000); // Update every 5 seconds
-        mLocationRequest.setFastestInterval(500);
+        mLocationRequest.setInterval(DESIRED_LOCATION_UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_LOCATION_UPDATE_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
@@ -112,7 +114,6 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     private void disableUi() {
         mUiDisabled = true;
-        mSmsMessage.setText(getText(R.string.location_unavailable));
         mSendMessageButton.setEnabled(false);
     }
 
@@ -132,6 +133,103 @@ public class ComposeMessageActivity extends ActionBarActivity
                     }
                 });
         alertDialog.show();
+    }
+
+    protected void startLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                mGoogleApiClient, this);
+    }
+
+    protected void updateUI() {
+        mSmsMessage.setText(mMessage.mMessageText);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mMessage.update(location);
+        updateUI();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        if (mCurrentlyResolvingError) {
+            // Currently attempting to resolve an error
+            return;
+        } else if (result.hasResolution()) {
+            try {
+                mCurrentlyResolvingError = true;
+                result.startResolutionForResult(this, REQUEST_RESOLVE_CONNECTION_ERROR);
+            } catch (IntentSender.SendIntentException e) {
+                mGoogleApiClient.connect();
+            }
+        } else {
+            int errorCode = result.getErrorCode();
+            GooglePlayServicesUtil.getErrorDialog(errorCode, this,
+                    REQUEST_RESOLVE_CONNECTION_ERROR).show();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        Log.w(TAG, "onResume called");
+        super.onResume();
+
+        checkPhoneSettings(this);
+
+        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
+            Log.d(TAG, "mGoogleApiClient connected and requesting updates");
+            startLocationUpdates();
+        }
+    }
+
+    private void checkPhoneSettings(Context context) {
+        boolean locationEnabled = isLocationEnabled(this);
+        if (!locationEnabled) {
+            // If location services disabled, display alert and disable UI if there is no
+            // previous location to show.
+            simpleAlertDialog(getString(R.string.location_disabled_alert_title),
+                    getString(R.string.location_disabled_alert_message),
+                    getString(R.string.location_disabled_alert_dismiss_button));
+            if (!mHaveLastLocation) {
+                mSmsMessage.setText(getText(R.string.location_unavailable));
+                disableUi();
+            }
+        }
+
+        if (locationEnabled && mUiDisabled) {
+            enableUi();
+        }
+
+        // Check if Flight Mode is on
+        boolean airplaneModeOn = isAirplaneModeOn(this);
+        if (airplaneModeOn){
+            simpleAlertDialog("Flight mode is on!", "To send messages with CQ, please go to Settings on your device and disable Flight Mode.", "OK");
+            disableUi();
+        }
     }
 
     /**
@@ -176,91 +274,18 @@ public class ComposeMessageActivity extends ActionBarActivity
         return isLocationEnabled;
     }
 
-    protected void startLocationUpdates() {
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
-    }
+    private boolean isAirplaneModeOn(Context context) {
+        boolean airplaneModeOn;
 
-    protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                mGoogleApiClient, this);
-    }
-
-    protected void updateUI() {
-        mSmsMessage.setText(mMessage.mMessageText);
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mMessage.update(location);
-        updateUI();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        if (mCurrentlyResolvingError) {
-            // Currently attempting to resolve an error
-            return;
-        } else if (result.hasResolution()) {
-            try {
-                mCurrentlyResolvingError = true;
-                result.startResolutionForResult(this, REQUEST_RESOLVE_CONNECTION_ERROR);
-            } catch (IntentSender.SendIntentException e) {
-                mGoogleApiClient.connect();
-            }
+        if (Build.VERSION.SDK_INT < 17){
+            airplaneModeOn = Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.AIRPLANE_MODE_ON, 0) != 0;
         } else {
-            // TODO: implement proper error recovery
-            int errorCode = result.getErrorCode();
-            GooglePlayServicesUtil.getErrorDialog(errorCode, this,
-                    REQUEST_RESOLVE_CONNECTION_ERROR).show();
-            //Toast.makeText(this, "Error connecting to Google Location Services.", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopLocationUpdates();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        Log.w(TAG, "onResume called");
-        super.onResume();
-        boolean locationEnabled = isLocationEnabled(this);
-
-        if (!locationEnabled) {
-            // If location services disabled, display alert and disable UI if there is no
-            // previous location to show.
-            simpleAlertDialog(getString(R.string.location_disabled_alert_title),
-                    getString(R.string.location_disabled_alert_message),
-                    getString(R.string.location_disabled_alert_dismiss_button));
-            if (!mHaveLastLocation) {
-                disableUi();
-            }
+            airplaneModeOn = Settings.Global.getInt(context.getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
         }
 
-        if (locationEnabled && mUiDisabled) {
-            enableUi();
-        }
-
-        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            Log.d(TAG, "mGoogleApiClient connected and requesting updates");
-            startLocationUpdates();
-        }
+        return airplaneModeOn;
     }
 
     @Override
@@ -306,7 +331,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        // TODO: change this to a switch statement for readability
+        // TODO: change to a switch statement for readability
         if (id == R.id.menu_pause_location_updates) {
             stopLocationUpdates();
             mRequestingLocationUpdates = false;
@@ -400,18 +425,6 @@ public class ComposeMessageActivity extends ActionBarActivity
     }
 
     public void sendSmsBtnHandler(View view) {
-        /*
-        // Check if radio is on (i.e., not in flight mode)
-        ServiceState serviceState = new ServiceState();
-        int state = serviceState.getState();
-        Log.d(TAG, "Service state: " + state);
-        if (state == ServiceState.STATE_POWER_OFF || state == ServiceState.STATE_OUT_OF_SERVICE) {
-            simpleAlertDialog("Error", "SMS cannot be sent because your phone has no cell signal.\nPlease make sure that your phone is not in flight mode, and try again.", "OK");
-        } else {
-            // If radio is on, create a location sms
-            prepareLocationMessage();
-        }
-        */
         prepareLocationMessage();
     }
 

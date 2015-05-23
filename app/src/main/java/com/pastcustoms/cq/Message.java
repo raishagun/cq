@@ -10,16 +10,18 @@ public class Message {
     private DateFormat mShortDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
     protected String mMapUrl;
     protected String mMessageText;
+    protected float accuracy;
+    protected long time;
 
     protected Message() { }
 
     protected void update(Location mostRecentLocation) {
         // Get accuracy
-        float accuracy = mostRecentLocation.getAccuracy();
+        accuracy = mostRecentLocation.getAccuracy();
         String accuracyRounded = String.valueOf(Math.round(accuracy));
 
         // Get 'last updated' time
-        long time = mostRecentLocation.getTime();
+        time = mostRecentLocation.getTime();
         String lastUpdated = mShortDateFormat.format(time);
 
         // Get latlong
