@@ -1,7 +1,5 @@
 package com.pastcustoms.cq;
 
-// TODO: add copyright statement
-
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -19,7 +17,6 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
-import android.telephony.ServiceState;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
@@ -43,12 +40,16 @@ public class ComposeMessageActivity extends ActionBarActivity
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     private static final String TAG = "CqApp";
-    static final int REQUEST_PICK_CONTACT = 1;  // The request code
-    static final int REQUEST_RESOLVE_CONNECTION_ERROR = 2; // Request code
-    static final int DESIRED_LOCATION_UPDATE_INTERVAL = 5000;
-    static final int FASTEST_LOCATION_UPDATE_INTERVAL = 1000;
+    // Request code for picking address book contact
+    static final int REQUEST_PICK_CONTACT = 1;
+    // Request code for resolving Google API connection error
+    static final int REQUEST_RESOLVE_CONNECTION_ERROR = 2;
+    static final int DESIRED_LOCATION_UPDATE_INTERVAL = 5000; // In milliseconds
+    static final int FASTEST_LOCATION_UPDATE_INTERVAL = 1000; // In milliseconds
     protected boolean mCurrentlyResolvingError = false;
+    // UI disabled when sending SMS doesn't make sense
     protected boolean mUiDisabled = false;
+    // Some (possible out of date) location data is available to display
     protected boolean mHaveLastLocation = false;
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
@@ -112,16 +113,30 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
+    /**
+     *  Disables the 'Send SMS' button and sets a boolean that results in the 'Resume/Pause updates'
+     *  options being hidden from the action bar options menu.
+     */
     private void disableUi() {
         mUiDisabled = true;
         mSendMessageButton.setEnabled(false);
     }
 
+    /**
+     *  Enables the 'Send SMS' button and sets a boolean that allows the 'Resume/Pause updates'
+     *  options to be shown in the action bar options menu.
+     */
     private void enableUi() {
         mUiDisabled = false;
         mSendMessageButton.setEnabled(true);
     }
 
+    /**
+     * Creates and shows a basic alert dialog based on the provided input.
+     * @param title the title for the alert dialog
+     * @param message the alert dialog's message
+     * @param buttonText the text for the single button that dismisses the dialog
+     */
     private void simpleAlertDialog(String title, String message, String buttonText) {
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle(title);
@@ -135,16 +150,25 @@ public class ComposeMessageActivity extends ActionBarActivity
         alertDialog.show();
     }
 
+    /**
+     * Requests location updates from the Fused Location Provider.
+     */
     protected void startLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
     }
 
+    /**
+     * Cancels request for location updates from the Fused Location Provider.
+     */
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
     }
 
+    /**
+     * Updates the UI by displaying the most recent message (which is held within a Message object).
+     */
     protected void updateUI() {
         mSmsMessage.setText(mMessage.mMessageText);
     }
@@ -163,16 +187,20 @@ public class ComposeMessageActivity extends ActionBarActivity
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         if (mCurrentlyResolvingError) {
-            // Currently attempting to resolve an error
+            // Currently attempting to resolve an error, so do nothing
             return;
         } else if (result.hasResolution()) {
+            // If there is an automatic resolution to this error, attempt it
             try {
                 mCurrentlyResolvingError = true;
                 result.startResolutionForResult(this, REQUEST_RESOLVE_CONNECTION_ERROR);
             } catch (IntentSender.SendIntentException e) {
+                // If there is an error with this resolution attempt, simply try re-connecting
                 mGoogleApiClient.connect();
             }
         } else {
+            // If there is no automatic resolution to the error, display an error dialog
+            // to the user (e.g., prompting update of Google Play Services)
             int errorCode = result.getErrorCode();
             GooglePlayServicesUtil.getErrorDialog(errorCode, this,
                     REQUEST_RESOLVE_CONNECTION_ERROR).show();
@@ -195,7 +223,7 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     @Override
     public void onResume() {
-        Log.w(TAG, "onResume called");
+        Log.d(TAG, "onResume called");
         super.onResume();
 
         checkPhoneSettings(this);
@@ -206,6 +234,13 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
+    /**
+     * Checks the phone's settings and displays appropriate error dialogs. Also disables the UI
+     * if necessary. Specifically:
+     * - Checks to see if location services are turned off, and if so, displays error dialog.
+     * - Checks to see if Flight Mode is on, and if so, displays an error dialog and disables UI.
+     * @param context the current context.
+     */
     private void checkPhoneSettings(Context context) {
         boolean locationEnabled = isLocationEnabled(this);
         if (!locationEnabled) {
@@ -226,15 +261,14 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         // Check if Flight Mode is on
         boolean airplaneModeOn = isAirplaneModeOn(this);
-        if (airplaneModeOn){
+        if (airplaneModeOn) {
             simpleAlertDialog("Flight mode is on!", "To send messages with CQ, please go to Settings on your device and disable Flight Mode.", "OK");
             disableUi();
         }
     }
 
     /**
-     * Checks if user has enabled location access.
-     *
+     * Helper function to check if user has enabled location access.
      * @param context the current context.
      * @return true if location access is enabled, false if disabled.
      */
@@ -274,10 +308,15 @@ public class ComposeMessageActivity extends ActionBarActivity
         return isLocationEnabled;
     }
 
+    /**
+     * Helper function to determine if Flight Mode (aka Airplane Mode) is enabled.
+     * @param context the current context.
+     * @return true if Flight Mode/ Airplane Mode is on.
+     */
     private boolean isAirplaneModeOn(Context context) {
         boolean airplaneModeOn;
 
-        if (Build.VERSION.SDK_INT < 17){
+        if (Build.VERSION.SDK_INT < 17) {
             airplaneModeOn = Settings.System.getInt(context.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) != 0;
         } else {
@@ -290,7 +329,7 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate the menu for the compose message activity (i.e. the main activity in this app)
         getMenuInflater().inflate(R.menu.menu_compose_message, menu);
 
         // Hide "Copy URL to clipboard" menu option if device does not support copying to clipboard
@@ -307,7 +346,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         MenuItem pauseUpdates = menu.findItem(R.id.menu_pause_location_updates);
         MenuItem copyUrl = menu.findItem(R.id.menu_copy_url);
 
-        if (mUiDisabled){
+        if (mUiDisabled) {
             // Hide both 'pause updates' and 'resume updates' buttons if UI disabled
             resumeUpdates.setVisible(false);
             pauseUpdates.setVisible(false);
@@ -353,6 +392,9 @@ public class ComposeMessageActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Copies location URL to clipboard.
+     */
     @TargetApi(11)
     public void copyUrl() {
         String mapUrl = mMessage.mMapUrl;
@@ -366,7 +408,9 @@ public class ComposeMessageActivity extends ActionBarActivity
         pickContact();
     }
 
-    // From tutorial
+    /**
+     * Starts activity to choose contact telephone number from address book.
+     */
     private void pickContact() {
         Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
         // Only show contacts with phone numbers
@@ -428,7 +472,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         prepareLocationMessage();
     }
 
-    private void prepareLocationMessage(){
+    private void prepareLocationMessage() {
         // Get phone number, Google Maps URL, and message to send via SMS
         String phoneNumber = mRecipientPhoneNo.getText().toString();
         String mapUrl = mMessage.mMapUrl;
@@ -461,8 +505,8 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         Log.d(TAG, "sending SMS");
         // Create intents
-        Intent smsSent = new Intent ("com.pastcustoms.cq.SMS_SENT");
-        Intent smsDelivery = new Intent ("com.pastcustoms.cq.SMS_DELIVERED");
+        Intent smsSent = new Intent("com.pastcustoms.cq.SMS_SENT");
+        Intent smsDelivery = new Intent("com.pastcustoms.cq.SMS_DELIVERED");
 
         // Create pending intents
         PendingIntent smsSentIntent
