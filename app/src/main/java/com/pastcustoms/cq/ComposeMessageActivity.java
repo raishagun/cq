@@ -226,8 +226,11 @@ public class ComposeMessageActivity extends ActionBarActivity
         Log.d(TAG, "onResume called");
         super.onResume();
 
+        // Check if user has disabled location services or turned on Flight Mode
         checkPhoneSettings(this);
 
+        // If connected to Google API client and requesting updates (i.e. user has not selected
+        // the 'pause location updates' option from menu), then start location updates.
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
             Log.d(TAG, "mGoogleApiClient connected and requesting updates");
             startLocationUpdates();
@@ -370,23 +373,23 @@ public class ComposeMessageActivity extends ActionBarActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        // TODO: change to a switch statement for readability
-        if (id == R.id.menu_pause_location_updates) {
-            stopLocationUpdates();
-            mRequestingLocationUpdates = false;
-            Toast.makeText(this, "Location updates are now paused", Toast.LENGTH_LONG).show();
-            return true;
-        } else if (id == R.id.menu_resume_location_updates) {
-            startLocationUpdates();
-            mRequestingLocationUpdates = true;
-            Toast.makeText(this, "Updating your location", Toast.LENGTH_LONG).show();
-            return true;
-        } else if (id == R.id.menu_about) {
-            simpleAlertDialog("About CQ", "Version 1.0\nDeveloped by Scott Bassett, 2015\ncq.pastcustoms.com", "OK");
-            return true;
-        } else if (id == R.id.menu_copy_url) {
-            copyUrl();
-            return true;
+        switch (id) {
+            case R.id.menu_pause_location_updates:
+                stopLocationUpdates();
+                mRequestingLocationUpdates = false;
+                Toast.makeText(this, "Location updates are now paused", Toast.LENGTH_LONG).show();
+                return true;
+            case R.id.menu_resume_location_updates:
+                startLocationUpdates();
+                mRequestingLocationUpdates = true;
+                Toast.makeText(this, "Updating your location", Toast.LENGTH_LONG).show();
+                return true;
+            case R.id.menu_about:
+                simpleAlertDialog("About CQ", "Version 1.0\nDeveloped by Scott Bassett, 2015\ncq.pastcustoms.com", "OK");
+                return true;
+            case R.id.menu_copy_url:
+                copyUrl();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -404,6 +407,9 @@ public class ComposeMessageActivity extends ActionBarActivity
         Toast.makeText(this, "URL copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Handler for choose contact button.
+     */
     public void chooseContact(View view) {
         pickContact();
     }
@@ -431,8 +437,16 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
+    /**
+     * Called when a response code is received from attempting to automatically resolve
+     * Google API Client connection error.
+     * @param resultCode the result code indicating the status of the error resolution attempt
+     * @param data an intent containing additional data about the error resolution attempt
+     */
     private void resolveConnectionError(int resultCode, Intent data) {
         mCurrentlyResolvingError = false;
+        // If attempt to resolve error was successful, try again to connect
+        // the client to Google Play Services.
         if (resultCode == RESULT_OK) {
             if (!mGoogleApiClient.isConnecting() && !mGoogleApiClient.isConnected()) {
                 mGoogleApiClient.connect();
@@ -441,6 +455,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     }
 
     // From tutorial
+    // TODO: perform this query with CursorLoader
     private void getContactPhoneNo(int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             // Get the URI that points to the selected contact
@@ -461,8 +476,6 @@ public class ComposeMessageActivity extends ActionBarActivity
             int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
             String number = cursor.getString(column);
 
-            // Do something with the phone number...
-
             // Display chosen number
             mRecipientPhoneNo.setText(number);
         }
@@ -472,6 +485,10 @@ public class ComposeMessageActivity extends ActionBarActivity
         prepareLocationMessage();
     }
 
+    /**
+     * Prepares to send the location message. Validates the phone number and the location URL,
+     * and passes the message to sendLocationMessage() if phone number and URL are OK.
+     */
     private void prepareLocationMessage() {
         // Get phone number, Google Maps URL, and message to send via SMS
         String phoneNumber = mRecipientPhoneNo.getText().toString();
@@ -501,14 +518,19 @@ public class ComposeMessageActivity extends ActionBarActivity
         return;
     }
 
+    /**
+     * Sends a location SMS to a phone number.
+     * @param phoneNumber the phone number of the SMS recipient
+     * @param messageText the location message to be sent via SMS
+     */
     private void sendLocationMessage(String phoneNumber, String messageText) {
 
         Log.d(TAG, "sending SMS");
-        // Create intents
+
+        // Create pending intents for the 'SmsStatusReceiver' broadcast receiver.
+        // These will communicate whether the SMS was successfuly sent and delivered.
         Intent smsSent = new Intent("com.pastcustoms.cq.SMS_SENT");
         Intent smsDelivery = new Intent("com.pastcustoms.cq.SMS_DELIVERED");
-
-        // Create pending intents
         PendingIntent smsSentIntent
                 = PendingIntent.getBroadcast(getBaseContext(), 0, smsSent, 0);
         PendingIntent smsDeliveryIntent
