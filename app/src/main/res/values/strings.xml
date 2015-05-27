@@ -17,6 +17,8 @@
     <string name="menu_resume_location_updates">Resume location updates</string>
     <string name="menu_copy_url">Copy URL to clipboard</string>
     <string name="menu_about">About CQ</string>
+    <string name="shared_prefs_file_key">com.pastcustoms.cq.PREFERENCE_FILE_KEY</string>
+    <string name="prefs_is_foreground_app">is_foreground_app</string>
 
 
 

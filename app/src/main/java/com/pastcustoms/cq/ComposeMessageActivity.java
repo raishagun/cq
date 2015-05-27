@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
@@ -60,6 +61,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected ImageButton mPickContactButton;
     protected Button mSendMessageButton;
     protected Message mMessage = new Message();
+    private SharedPreferences mSharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,9 @@ public class ComposeMessageActivity extends ActionBarActivity
         mSendMessageButton = (Button) findViewById(R.id.send_message_button);
         mRecipientPhoneNo = (TextView) findViewById(R.id.phone_no);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
+
+        mSharedPrefs = getSharedPreferences(
+                getString(R.string.shared_prefs_file_key), Context.MODE_PRIVATE);
 
         buildGoogleApiClient();
     }
@@ -211,6 +216,12 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected void onPause() {
         super.onPause();
         stopLocationUpdates();
+
+        // Record in shared preferences that CQ is no longer foreground app
+        SharedPreferences.Editor editor = mSharedPrefs.edit();
+        editor.putBoolean(getString(R.string.prefs_is_foreground_app), false);
+        editor.commit();
+
     }
 
     @Override
@@ -225,6 +236,11 @@ public class ComposeMessageActivity extends ActionBarActivity
     public void onResume() {
         Log.d(TAG, "onResume called");
         super.onResume();
+
+        // Record in shared preferences that CQ is foreground app
+        SharedPreferences.Editor editor = mSharedPrefs.edit();
+        editor.putBoolean(getString(R.string.prefs_is_foreground_app), true);
+        editor.commit();
 
         // Check if user has disabled location services or turned on Flight Mode
         checkPhoneSettings(this);
