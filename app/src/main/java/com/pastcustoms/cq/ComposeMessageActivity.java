@@ -342,7 +342,6 @@ public class ComposeMessageActivity extends ActionBarActivity
             airplaneModeOn = Settings.Global.getInt(context.getContentResolver(),
                     Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
         }
-
         return airplaneModeOn;
     }
 
@@ -381,6 +380,7 @@ public class ComposeMessageActivity extends ActionBarActivity
             pauseUpdates.setVisible(false);
             copyUrl.setVisible(true);
         }
+        // Must return true for the menu to be displayed (see Android API docs)
         return true;
     }
 
@@ -543,10 +543,27 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         Log.d(TAG, "sending SMS");
 
+        // Create a new message id
+        int messageId = mSharedPrefs.getInt(getString(R.string.prefs_notification_id), 0);
+        ++messageId; // new id is simply old id, incremented
+        messageId = messageId%100; // start re-using ids once messageId == 100.
+
+        // Save new message id in shared preferences
+        SharedPreferences.Editor editor = mSharedPrefs.edit();
+        editor.putInt(getString(R.string.prefs_notification_id), messageId);
+        editor.commit();
+
         // Create pending intents for the 'SmsStatusReceiver' broadcast receiver.
-        // These will communicate whether the SMS was successfuly sent and delivered.
+        // These will communicate whether the SMS was successfully sent and delivered.
         Intent smsSent = new Intent("com.pastcustoms.cq.SMS_SENT");
         Intent smsDelivery = new Intent("com.pastcustoms.cq.SMS_DELIVERED");
+
+        smsSent.putExtra("TEL_NO", phoneNumber);
+        smsDelivery.putExtra("TEL_NO", phoneNumber);
+
+        smsSent.putExtra("MSG_ID", messageId);
+        smsDelivery.putExtra("MSG_ID", messageId);
+
         PendingIntent smsSentIntent
                 = PendingIntent.getBroadcast(getBaseContext(), 0, smsSent, 0);
         PendingIntent smsDeliveryIntent
@@ -557,5 +574,4 @@ public class ComposeMessageActivity extends ActionBarActivity
         smsManager.sendTextMessage(phoneNumber, null, messageText,
                 smsSentIntent, smsDeliveryIntent);
     }
-
 }

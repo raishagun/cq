@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 public class SmsStatusReceiver extends BroadcastReceiver {
 
+    private SharedPreferences mSharedPrefs;
+
     // Check if ComposeMessageActivity is running. If so, show error dialog; if not,
     // send notification.
 
@@ -21,36 +23,39 @@ public class SmsStatusReceiver extends BroadcastReceiver {
 
         // Check if ComposeMessageActivity is running in foreground.
         // Do this by checking Shared Preferences.
-        SharedPreferences sharedPrefs = context.getSharedPreferences(
+        mSharedPrefs = context.getSharedPreferences(
                 context.getString(R.string.shared_prefs_file_key), Context.MODE_PRIVATE);
-        boolean cqIsForeground = sharedPrefs.getBoolean(
+        boolean cqIsForeground = mSharedPrefs.getBoolean(
                 context.getString(R.string.prefs_is_foreground_app), false);
 
         String actionName = intent.getAction();
+        String phoneNumber = intent.getStringExtra("TEL_NO");
+        int messageId = intent.getIntExtra("MSG_ID", 0);
         String errorMessage;
+
         if (actionName.equals("com.pastcustoms.cq.SMS_SENT")){
             switch(getResultCode()) {
                 case Activity.RESULT_OK:
                     // Only display "SMS sent" toast if CQ is in foreground.
                     if (cqIsForeground) {
-                        Toast.makeText(context, "SMS sent", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "SMS sent to " + phoneNumber, Toast.LENGTH_LONG).show();
                     }
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
                     // Display error dialog if CQ is in foreground. If not, create a notification.
-                    errorMessage = "SMS was not sent! Please make sure that your phone is not in flight mode and try again.";
+                    errorMessage = "SMS to " + phoneNumber + " was not sent! Please make sure that your phone is not in flight mode and try again.";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
-                        errorNotification(context, errorMessage);
+                        errorNotification(context, errorMessage, messageId);
                     }
                     break;
                 default:
-                    errorMessage = "SMS was not sent! Please try again.";
+                    errorMessage = "SMS to " + phoneNumber + " was not sent! Please try again.";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
-                        errorNotification(context, errorMessage);
+                        errorNotification(context, errorMessage, messageId);
                     }
             }
         }
@@ -59,29 +64,32 @@ public class SmsStatusReceiver extends BroadcastReceiver {
             switch(getResultCode()) {
                 case Activity.RESULT_OK:
                     if (cqIsForeground) {
-                        Toast.makeText(context, "SMS delivered", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "SMS delivered to " + phoneNumber, Toast.LENGTH_LONG).show();
                     }
                     break;
                 default:
-                    errorMessage = "SMS was not successfully delivered! Please try again.";
+                    errorMessage = "SMS to " + phoneNumber + " was not successfully delivered! Please try again.";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
-                        errorNotification(context, errorMessage);
+                        errorNotification(context, errorMessage, messageId);
                     }
             }
         }
     }
 
-    private void errorNotification(Context context, String errorMessage) {
+    private void errorNotification(Context context, String errorMessage, int messageId) {
+
+        // Build notification based on provided error message
         NotificationCompat.Builder mNotificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.alert)
                 .setContentTitle("CQ could not send your location SMS")
                 .setContentText(errorMessage);
 
+        // Send notification to user (can modify later using messageId)
         NotificationManager mNotificationManager
                 = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(0, mNotificationBuilder.build());
+        mNotificationManager.notify(messageId, mNotificationBuilder.build());
     }
 
     private void errorDialog(Context context, String message) {

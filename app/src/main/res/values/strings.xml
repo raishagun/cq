@@ -19,6 +19,8 @@
     <string name="menu_about">About CQ</string>
     <string name="shared_prefs_file_key">com.pastcustoms.cq.PREFERENCE_FILE_KEY</string>
     <string name="prefs_is_foreground_app">is_foreground_app</string>
+    <string name="prefs_notification_id">notification_id</string>
+
 
 
 
