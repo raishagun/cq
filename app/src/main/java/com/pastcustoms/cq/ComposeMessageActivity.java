@@ -119,8 +119,8 @@ public class ComposeMessageActivity extends ActionBarActivity
     }
 
     /**
-     *  Disables the 'Send SMS' button and sets a boolean that results in the 'Resume/Pause updates'
-     *  options being hidden from the action bar options menu.
+     * Disables the 'Send SMS' button and sets a boolean that results in the 'Resume/Pause updates'
+     * options being hidden from the action bar options menu.
      */
     private void disableUi() {
         mUiDisabled = true;
@@ -128,8 +128,8 @@ public class ComposeMessageActivity extends ActionBarActivity
     }
 
     /**
-     *  Enables the 'Send SMS' button and sets a boolean that allows the 'Resume/Pause updates'
-     *  options to be shown in the action bar options menu.
+     * Enables the 'Send SMS' button and sets a boolean that allows the 'Resume/Pause updates'
+     * options to be shown in the action bar options menu.
      */
     private void enableUi() {
         mUiDisabled = false;
@@ -138,8 +138,9 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     /**
      * Creates and shows a basic alert dialog based on the provided input.
-     * @param title the title for the alert dialog
-     * @param message the alert dialog's message
+     *
+     * @param title      the title for the alert dialog
+     * @param message    the alert dialog's message
      * @param buttonText the text for the single button that dismisses the dialog
      */
     private void simpleAlertDialog(String title, String message, String buttonText) {
@@ -191,11 +192,14 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
+
+        // If currently attempting to resolve an error, do nothing
         if (mCurrentlyResolvingError) {
-            // Currently attempting to resolve an error, so do nothing
             return;
-        } else if (result.hasResolution()) {
-            // If there is an automatic resolution to this error, attempt it
+        }
+
+        // If there is an automatic resolution to this error, attempt it
+        if (result.hasResolution()) {
             try {
                 mCurrentlyResolvingError = true;
                 result.startResolutionForResult(this, REQUEST_RESOLVE_CONNECTION_ERROR);
@@ -216,7 +220,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected void onPause() {
         super.onPause();
 
-        // If Google Api Client is connected, then stop location updates.
+        // If Google Api Client is connected, stop location updates.
         if (mGoogleApiClient.isConnected()) {
             stopLocationUpdates();
         }
@@ -262,6 +266,7 @@ public class ComposeMessageActivity extends ActionBarActivity
      * if necessary. Specifically:
      * - Checks to see if location services are turned off, and if so, displays error dialog.
      * - Checks to see if Flight Mode is on, and if so, displays an error dialog and disables UI.
+     *
      * @param context the current context.
      */
     private void checkPhoneSettings(Context context) {
@@ -285,13 +290,33 @@ public class ComposeMessageActivity extends ActionBarActivity
         // Check if Flight Mode is on
         boolean airplaneModeOn = isAirplaneModeOn(this);
         if (airplaneModeOn) {
-            simpleAlertDialog("Flight mode is on!", "To send messages with CQ, please go to Settings on your device and disable Flight Mode.", "OK");
-            disableUi();
+            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setTitle("Flight mode is on!");
+            alertDialog.setMessage("To send messages with CQ, first disable Flight Mode.");
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Go to Settings",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int x) {
+                            dialog.dismiss();
+                            Intent settingsFlightMode = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+                            startActivity(settingsFlightMode);
+
+                        }
+                    });
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int x) {
+                            mSmsMessage.setText(getText(R.string.location_unavailable));
+                            disableUi();
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
         }
     }
 
     /**
      * Helper function to check if user has enabled location access.
+     *
      * @param context the current context.
      * @return true if location access is enabled, false if disabled.
      */
@@ -333,6 +358,7 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     /**
      * Helper function to determine if Flight Mode (aka Airplane Mode) is enabled.
+     *
      * @param context the current context.
      * @return true if Flight Mode/ Airplane Mode is on.
      */
@@ -460,8 +486,9 @@ public class ComposeMessageActivity extends ActionBarActivity
     /**
      * Called when a response code is received from attempting to automatically resolve
      * Google API Client connection error.
+     *
      * @param resultCode the result code indicating the status of the error resolution attempt
-     * @param data an intent containing additional data about the error resolution attempt
+     * @param data       an intent containing additional data about the error resolution attempt
      */
     private void resolveConnectionError(int resultCode, Intent data) {
         mCurrentlyResolvingError = false;
@@ -546,6 +573,7 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     /**
      * Sends a location SMS to a phone number.
+     *
      * @param phoneNumber the phone number of the SMS recipient
      * @param messageText the location message to be sent via SMS
      */
@@ -556,7 +584,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         // Create a new message id
         int messageId = mSharedPrefs.getInt(getString(R.string.prefs_notification_id), 0);
         ++messageId; // new id is simply old id, incremented
-        messageId = messageId%100; // start re-using ids once messageId == 100.
+        messageId = messageId % 100; // start re-using ids once messageId == 100.
 
         // Save new message id in shared preferences
         SharedPreferences.Editor editor = mSharedPrefs.edit();
