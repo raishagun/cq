@@ -215,7 +215,11 @@ public class ComposeMessageActivity extends ActionBarActivity
     @Override
     protected void onPause() {
         super.onPause();
-        stopLocationUpdates();
+
+        // If Google Api Client is connected, then stop location updates.
+        if (mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+        }
 
         // Record in shared preferences that CQ is no longer foreground app
         SharedPreferences.Editor editor = mSharedPrefs.edit();
