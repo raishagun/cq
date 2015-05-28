@@ -278,7 +278,7 @@ public class ComposeMessageActivity extends ActionBarActivity
             }
         }
 
-        if (locationEnabled && mUiDisabled) {
+        if (locationEnabled && mGoogleApiClient.isConnected() && mUiDisabled) {
             enableUi();
         }
 
@@ -471,6 +471,12 @@ public class ComposeMessageActivity extends ActionBarActivity
             if (!mGoogleApiClient.isConnecting() && !mGoogleApiClient.isConnected()) {
                 mGoogleApiClient.connect();
             }
+        } else {
+            // If still unable to resolve connection by this point, display dialog and disable UI.
+            mSmsMessage.setText(getText(R.string.location_unavailable));
+            disableUi();
+            mSendMessageButton.setEnabled(false);
+            simpleAlertDialog("Error connecting to Google Play Services", "For some reason, CQ cannot connect to Google Play Services. Unfortunately, this means CQ can't get your location!", "OK");
         }
     }
 
