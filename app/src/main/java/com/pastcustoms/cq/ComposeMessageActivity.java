@@ -271,12 +271,29 @@ public class ComposeMessageActivity extends ActionBarActivity
      */
     private void checkPhoneSettings(Context context) {
         boolean locationEnabled = isLocationEnabled(this);
+        // If location services disabled, display alert dialog
         if (!locationEnabled) {
-            // If location services disabled, display alert and disable UI if there is no
-            // previous location to show.
-            simpleAlertDialog(getString(R.string.location_disabled_alert_title),
-                    getString(R.string.location_disabled_alert_message),
-                    getString(R.string.location_disabled_alert_dismiss_button));
+            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setTitle(getString(R.string.location_disabled_alert_title));
+            alertDialog.setMessage(getString(R.string.location_disabled_alert_message));
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Go to Settings",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int x) {
+                            dialog.dismiss();
+                            Intent settingsLocation = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(settingsLocation);
+                        }
+                    });
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.location_disabled_alert_dismiss_button),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int x) {
+                            disableUi();
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+
+            // Disable ui if there is no previous location to show
             if (!mHaveLastLocation) {
                 mSmsMessage.setText(getText(R.string.location_unavailable));
                 disableUi();
@@ -305,7 +322,6 @@ public class ComposeMessageActivity extends ActionBarActivity
             alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int x) {
-                            mSmsMessage.setText(getText(R.string.location_unavailable));
                             disableUi();
                             dialog.dismiss();
                         }
