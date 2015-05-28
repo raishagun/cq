@@ -7,8 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class SmsStatusReceiver extends BroadcastReceiver {
@@ -29,7 +31,13 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                 context.getString(R.string.prefs_is_foreground_app), false);
 
         String actionName = intent.getAction();
-        String phoneNumber = intent.getStringExtra("TEL_NO");
+        //String phoneNumOrName = intent.getStringExtra("PHONE_OR_NAME");
+
+        Bundle extras = intent.getExtras();
+        String phoneNumOrName = extras.getString("PHONE_OR_NAME");
+
+
+
         int messageId = intent.getIntExtra("MSG_ID", 0);
         String errorMessage;
 
@@ -37,13 +45,17 @@ public class SmsStatusReceiver extends BroadcastReceiver {
             switch(getResultCode()) {
                 case Activity.RESULT_OK:
                     // Only display "SMS sent" toast if CQ is in foreground.
+                    // todo: debugging code -- remove when no longer necessary:
+                    errorNotification(context, "This is just a test", messageId);
+
                     if (cqIsForeground) {
-                        Toast.makeText(context, "SMS sent to " + phoneNumber, Toast.LENGTH_LONG).show();
+                        Log.d("CQ receiver", "phoneNumOrName: " + phoneNumOrName);
+                        Toast.makeText(context, "SMS sent to " + phoneNumOrName, Toast.LENGTH_LONG).show();
                     }
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
                     // Display error dialog if CQ is in foreground. If not, create a notification.
-                    errorMessage = "SMS to " + phoneNumber + " was not sent! Please make sure that your phone is not in flight mode and try again.";
+                    errorMessage = "SMS to " + phoneNumOrName + " was not sent! Please make sure that your phone is not in flight mode and try again.";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -51,7 +63,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                     }
                     break;
                 default:
-                    errorMessage = "SMS to " + phoneNumber + " was not sent! Please try again.";
+                    errorMessage = "SMS to " + phoneNumOrName + " was not sent! Please try again.";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -64,11 +76,11 @@ public class SmsStatusReceiver extends BroadcastReceiver {
             switch(getResultCode()) {
                 case Activity.RESULT_OK:
                     if (cqIsForeground) {
-                        Toast.makeText(context, "SMS delivered to " + phoneNumber, Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "SMS delivered to " + phoneNumOrName, Toast.LENGTH_LONG).show();
                     }
                     break;
                 default:
-                    errorMessage = "SMS to " + phoneNumber + " was not successfully delivered! Please try again.";
+                    errorMessage = "SMS to " + phoneNumOrName + " was not successfully delivered! Please try again.";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -78,6 +90,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
         }
     }
 
+    // todo: set high priority for these notifications
     private void errorNotification(Context context, String errorMessage, int messageId) {
 
         // Build notification based on provided error message

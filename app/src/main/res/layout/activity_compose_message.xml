@@ -8,24 +8,39 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:focusable="true"
-        android:focusableInTouchMode="true">
+        android:focusableInTouchMode="true"
+        android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp">
 
         <TextView
             android:id="@+id/header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
-            android:text="Send to:"
-            android:textSize="@dimen/abc_text_size_large_material"
-            android:textColor="@color/primary_text"/>
+            android:text="Send to: "
+            android:textColor="@color/primary_text"
+            android:textSize="@dimen/abc_text_size_large_material"/>
+
+        <TextView
+            android:id="@+id/contact_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/dark_primary"
+            android:textSize="@dimen/abc_text_size_large_material"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
             android:orientation="horizontal"
             android:paddingLeft="10dp"
             android:paddingRight="10dp">
@@ -36,27 +51,18 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:ems="10"
-                android:inputType="phone"
-                android:imeOptions="actionDone"/>
-<!--
-            <Button
-                android:id="@+id/pick_contact_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="chooseContact"
-                android:text="@string/button_pick_contact" />
-                -->
+                android:imeOptions="actionDone"
+                android:inputType="phone"/>
 
             <ImageButton
                 android:id="@+id/pick_contact_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/contactsbtn"
+                android:contentDescription="Choose a telephone number from your contacts."
                 android:onClick="chooseContact"
-                android:contentDescription="Choose a telephone number from your contacts." />
+                android:src="@drawable/contactsbtn" />
 
         </LinearLayout>
-
 
         <TextView
             android:id="@+id/message_header"
@@ -65,8 +71,8 @@
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
             android:text="Message:"
-            android:textSize="@dimen/abc_text_size_large_material"
-            android:textColor="@color/primary_text"/>
+            android:textColor="@color/primary_text"
+            android:textSize="@dimen/abc_text_size_large_material"/>
 
 
         <TextView
@@ -76,69 +82,32 @@
             android:layout_margin="10dp"
             android:autoLink="all"
             android:background="#ffffffff"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:padding="10dp"
-            android:textSize="18sp"
             android:textColor="@color/primary_text"
             android:textColorLink="@color/accent"
             android:textIsSelectable="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true"/>
+            android:textSize="18sp"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="10dp">
-<!--
-            <Button
-                android:id="@+id/copy_url_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="copyUrl"
-                android:text="@string/button_copy_url" />
-                -->
 
             <Button
                 android:id="@+id/send_message_button"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="false"
+                android:layout_centerHorizontal="true"
                 android:onClick="sendSmsBtnHandler"
                 android:text="@string/button_send_message"
-                android:layout_alignParentRight="false"
-                android:textStyle="bold"
-                android:layout_centerHorizontal="true" />
+                android:textStyle="bold" />
 
         </RelativeLayout>
 
-<!--
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:background="@color/primary"
-            android:id="@+id/footer">
-
-            <TextView
-                android:id="@+id/update_location_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="10dp"
-                android:text="Update location"
-                android:textSize="18dp"
-                android:textColor="#FFFFFF" />
-
-            <ToggleButton
-                android:id="@+id/update_location_toggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:onClick="toggleUpdatesHandler"
-                android:textOff="Off"
-                android:textOn="On" />
-
-        </LinearLayout>
-        -->
 
 
     </LinearLayout>

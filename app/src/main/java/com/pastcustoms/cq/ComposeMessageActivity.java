@@ -19,11 +19,14 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.telephony.SmsManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,13 +43,13 @@ import com.google.android.gms.location.LocationServices;
 public class ComposeMessageActivity extends ActionBarActivity
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
-    private static final String TAG = "CqApp";
     // Request code for picking address book contact
     static final int REQUEST_PICK_CONTACT = 1;
     // Request code for resolving Google API connection error
     static final int REQUEST_RESOLVE_CONNECTION_ERROR = 2;
     static final int DESIRED_LOCATION_UPDATE_INTERVAL = 5000; // In milliseconds
     static final int FASTEST_LOCATION_UPDATE_INTERVAL = 1000; // In milliseconds
+    private static final String TAG = "CqApp";
     protected boolean mCurrentlyResolvingError = false;
     // UI disabled when sending SMS doesn't make sense
     protected boolean mUiDisabled = false;
@@ -56,7 +59,8 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected Location mLastLocation;
     protected LocationRequest mLocationRequest;
     protected boolean mRequestingLocationUpdates = true;
-    protected TextView mRecipientPhoneNo;
+    protected EditText mRecipientPhoneNo;
+    protected TextView mContactDisplayName;
     protected TextView mSmsMessage;
     protected ImageButton mPickContactButton;
     protected Button mSendMessageButton;
@@ -70,8 +74,21 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         mPickContactButton = (ImageButton) findViewById(R.id.pick_contact_button);
         mSendMessageButton = (Button) findViewById(R.id.send_message_button);
-        mRecipientPhoneNo = (TextView) findViewById(R.id.phone_no);
+        mContactDisplayName = (TextView) findViewById(R.id.contact_name);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
+
+        mRecipientPhoneNo = (EditText) findViewById(R.id.phone_no);
+
+        TextWatcher textWatcher = new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                mContactDisplayName.setText("");
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        };
+        mRecipientPhoneNo.addTextChangedListener(textWatcher);
+
+
 
         mSharedPrefs = getSharedPreferences(
                 getString(R.string.shared_prefs_file_key), Context.MODE_PRIVATE);
@@ -525,15 +542,17 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     // From tutorial
     // TODO: perform this query with CursorLoader
+    /**
+     * Gets and displays the phone number and 'display name' of a single chosen contact
+     */
     private void getContactPhoneNo(int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             // Get the URI that points to the selected contact
             Uri contactUri = data.getData();
-            // We only need the NUMBER column, because there will be only one row in the result
-            String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER};
+            // We'll need the contact's phone number and display name
+            String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER,
+                    ContactsContract.Contacts.DISPLAY_NAME};
 
-            // Perform the query on the contact to get the NUMBER column
-            // We don't need a selection or sort order (there's only one result for the given URI)
             // CAUTION: The query() method should be called from a separate thread to avoid blocking
             // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
             // Consider using CursorLoader to perform the query.
@@ -542,11 +561,17 @@ public class ComposeMessageActivity extends ActionBarActivity
             cursor.moveToFirst();
 
             // Retrieve the phone number from the NUMBER column
-            int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-            String number = cursor.getString(column);
+            int phoneColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+            String number = cursor.getString(phoneColumn);
+
+            int nameColumn = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+            String name = cursor.getString(nameColumn);
 
             // Display chosen number
             mRecipientPhoneNo.setText(number);
+
+            // Display contact's display name
+            mContactDisplayName.setText(name);
         }
     }
 
@@ -612,8 +637,17 @@ public class ComposeMessageActivity extends ActionBarActivity
         Intent smsSent = new Intent("com.pastcustoms.cq.SMS_SENT");
         Intent smsDelivery = new Intent("com.pastcustoms.cq.SMS_DELIVERED");
 
-        smsSent.putExtra("TEL_NO", phoneNumber);
-        smsDelivery.putExtra("TEL_NO", phoneNumber);
+        // Report SMS status using contact name, if available (more readable than phone number)
+        String contactName = mContactDisplayName.getText().toString();
+        Log.d(TAG, "contact name is: " + contactName);
+
+        if (contactName.equals("")) {
+            smsSent.putExtra("PHONE_OR_NAME", phoneNumber);
+            smsDelivery.putExtra("PHONE_OR_NAME", phoneNumber);
+        } else {
+            smsSent.putExtra("PHONE_OR_NAME", contactName);
+            smsDelivery.putExtra("PHONE_OR_NAME", contactName);
+        }
 
         smsSent.putExtra("MSG_ID", messageId);
         smsDelivery.putExtra("MSG_ID", messageId);
