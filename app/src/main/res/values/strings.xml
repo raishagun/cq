@@ -23,7 +23,7 @@
     <string name="airplane_mode_alert_message">To send messages with CQ, first disable Flight Mode.</string>
     <string name="toast_location_updates_paused">Location updates are now paused</string>
     <string name="toast_updating_location">Updating your location</string>
-    <string name="about_cq_details">"Version 1.0\nDeveloped by Scott Bassett, 2015\nwww.pastcustoms.com"</string>
+    <string name="about_cq_details">"Version 1.0\nDeveloped by Scott Bassett, 2015\nwww.pastcustoms.com\n\nIcons:\nionicons.com\ngoogle.com/design/icons\n\nBackground pattern:\nsubtlepatterns.com"</string>
     <string name="about_cq_title">About CQ</string>
     <string name="ok">OK</string>
     <string name="my_location">My location</string>

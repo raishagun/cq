@@ -2,7 +2,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/gridnoise_repeating">
 
     <LinearLayout
         android:id="@+id/header"
@@ -61,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/pick_contact_description"
                 android:onClick="chooseContact"
-                android:src="@drawable/contactsbtn" />
+                android:src="@drawable/contactsbutton" />
 
         </LinearLayout>
 
