@@ -49,7 +49,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     static final int REQUEST_RESOLVE_CONNECTION_ERROR = 2;
     static final int DESIRED_LOCATION_UPDATE_INTERVAL = 5000; // In milliseconds
     static final int FASTEST_LOCATION_UPDATE_INTERVAL = 1000; // In milliseconds
-    static final String TAG = "CqApp";
+    static final String TAG = "CqApp"; // Tag for writing to the log
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
     protected LocationRequest mLocationRequest;

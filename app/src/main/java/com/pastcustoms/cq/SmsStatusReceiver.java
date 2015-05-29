@@ -3,6 +3,7 @@ package com.pastcustoms.cq;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,12 +32,9 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                 context.getString(R.string.prefs_is_foreground_app), false);
 
         String actionName = intent.getAction();
-        //String phoneNumOrName = intent.getStringExtra("PHONE_OR_NAME");
 
         Bundle extras = intent.getExtras();
         String phoneNumOrName = extras.getString("PHONE_OR_NAME");
-
-
 
         int messageId = intent.getIntExtra("MSG_ID", 0);
         String errorMessage;
@@ -55,7 +53,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
                     // Display error dialog if CQ is in foreground. If not, create a notification.
-                    errorMessage = "SMS to " + phoneNumOrName + " was not sent! Please make sure that your phone is not in flight mode and try again.";
+                    errorMessage = "SMS to " + phoneNumOrName + " was not sent! Please try again.";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -93,11 +91,21 @@ public class SmsStatusReceiver extends BroadcastReceiver {
     // todo: set high priority for these notifications
     private void errorNotification(Context context, String errorMessage, int messageId) {
 
+        // Create pending intent to launch CQ directly from the notification
+        Intent startCqIntent = new Intent(context, ComposeMessageActivity.class);
+        PendingIntent startCqPendingIntent = PendingIntent.getActivity(
+                context,
+                0, // no need for a real request code here, since we just want to start CQ
+                startCqIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
         // Build notification based on provided error message
         NotificationCompat.Builder mNotificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.alert)
-                .setContentTitle("CQ could not send your location SMS")
-                .setContentText(errorMessage);
+                .setContentTitle("Location SMS not sent")
+                .setContentText(errorMessage)
+                .setContentIntent(startCqPendingIntent);
 
         // Send notification to user (can modify later using messageId)
         NotificationManager mNotificationManager
