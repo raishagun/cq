@@ -50,6 +50,9 @@ public class ComposeMessageActivity extends ActionBarActivity
     static final int DESIRED_LOCATION_UPDATE_INTERVAL = 5000; // In milliseconds
     static final int FASTEST_LOCATION_UPDATE_INTERVAL = 1000; // In milliseconds
     static final String TAG = "CqApp"; // Tag for writing to the log
+    // Used to decide if "Copy URL to clipboard" button should be shown in menu.
+    // Copying to clipboard is only supported in SDK level >= 11
+    static final boolean DEVICE_SUPPORTS_COPY_URL = (Build.VERSION.SDK_INT >= 11);
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
     protected LocationRequest mLocationRequest;
@@ -149,26 +152,6 @@ public class ComposeMessageActivity extends ActionBarActivity
     }
 
     /**
-     * Creates and shows a basic alert dialog based on the provided input.
-     *
-     * @param title      the title for the alert dialog
-     * @param message    the alert dialog's message
-     * @param buttonText the text for the single button that dismisses the dialog
-     */
-    private void simpleAlertDialog(String title, String message, String buttonText) {
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle(title);
-        alertDialog.setMessage(message);
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, buttonText,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int x) {
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.show();
-    }
-
-    /**
      * Requests location updates from the Fused Location Provider.
      */
     protected void startLocationUpdates() {
@@ -261,6 +244,10 @@ public class ComposeMessageActivity extends ActionBarActivity
         editor.putBoolean(getString(R.string.prefs_is_foreground_app), true);
         editor.commit();
 
+        // Provisionally enable UI. The UI will be disabled if subsequent check of phone settings
+        // reveals any problems (e.g., airplane mode is on)
+        enableUi();
+
         // Check if user has disabled location services or turned on Flight Mode
         checkPhoneSettings(this);
 
@@ -306,10 +293,10 @@ public class ComposeMessageActivity extends ActionBarActivity
                     getString(R.string.location_disabled_alert_message),
                     Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 
-            // If location services disabled, disable ui if there is no previous location to show
+            // If location services disabled, display "location unavailable"
+            // if there is no previous location to show
             if (!mHaveLastLocation) {
                 mSmsMessage.setText(getText(R.string.location_unavailable));
-                disableUi();
             }
         }
 
@@ -335,7 +322,7 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     /**
      * Displays an alert dialog with the following options:
-     * - Cancel (simply dismisses the dialog)
+     * - Cancel (dismisses the dialog and disables the UI)
      * - Go to Settings (goes to appropriate phone settings page)
      * @param title the alert dialog title
      * @param message the alert dialog message
@@ -424,12 +411,6 @@ public class ComposeMessageActivity extends ActionBarActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu for the compose message activity (i.e. the main activity in this app)
         getMenuInflater().inflate(R.menu.menu_compose_message, menu);
-
-        // Hide "Copy URL to clipboard" menu option if device does not support copying to clipboard
-        if (Build.VERSION.SDK_INT < 11) {
-            MenuItem copyUrl = menu.findItem(R.id.menu_copy_url);
-            copyUrl.setVisible(false);
-        }
         return true;
     }
 
@@ -455,6 +436,12 @@ public class ComposeMessageActivity extends ActionBarActivity
             pauseUpdates.setVisible(false);
             copyUrl.setVisible(true);
         }
+
+        // If device doesn't support copying URL to clipboard, hide this menu option
+        if (!DEVICE_SUPPORTS_COPY_URL){
+            copyUrl.setVisible(false);
+        }
+
         // Must return true for the menu to be displayed (see Android API docs)
         return true;
     }
@@ -485,6 +472,28 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    /**
+     * Creates and shows a basic alert dialog based on the provided input.
+     *
+     * @param title      the title for the alert dialog
+     * @param message    the alert dialog's message
+     * @param buttonText the text for the single button that dismisses the dialog
+     */
+    private void simpleAlertDialog(String title, String message, String buttonText) {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, buttonText,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int x) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
+
 
     /**
      * Copies location URL to clipboard.
@@ -552,8 +561,6 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
-    // From tutorial
-    // TODO: perform this query with CursorLoader
 
     /**
      * Gets and displays the phone number and 'display name' of a single chosen contact
