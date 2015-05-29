@@ -62,7 +62,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     private boolean mCurrentlyResolvingError = false;
     // UI disabled when sending SMS doesn't make sense
     private boolean mUiDisabled = false;
-    // Some (possible out of date) location data is available to display
+    // Some (possibly out of date) location data is available to display
     private boolean mHaveLastLocation = false;
     private boolean mRequestingLocationUpdates = true;
     private SharedPreferences mSharedPrefs;

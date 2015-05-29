@@ -22,8 +22,8 @@
     <string name="prefs_notification_id">notification_id</string>
     <string name="prefs_last_phone_no">last_phone_no</string>
     <string name="prefs_last_display_name">last_display_name</string>
-    <string name="button_go_to_settings">Cancel</string>
-    <string name="button_cancel">Go to Settings</string>
+    <string name="button_go_to_settings">Go to Settings</string>
+    <string name="button_cancel">Cancel</string>
     <string name="airplane_mode_alert_title">"Flight mode is on!"</string>
     <string name="airplane_mode_alert_message">"To send messages with CQ, first disable Flight Mode."</string>
 
