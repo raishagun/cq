@@ -455,15 +455,20 @@ public class ComposeMessageActivity extends ActionBarActivity
             case R.id.menu_pause_location_updates:
                 stopLocationUpdates();
                 mRequestingLocationUpdates = false;
-                Toast.makeText(this, "Location updates are now paused", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.toast_location_updates_paused),
+                        Toast.LENGTH_LONG).show();
                 return true;
             case R.id.menu_resume_location_updates:
                 startLocationUpdates();
                 mRequestingLocationUpdates = true;
-                Toast.makeText(this, "Updating your location", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.toast_updating_location),
+                        Toast.LENGTH_LONG).show();
                 return true;
             case R.id.menu_about:
-                simpleAlertDialog("About CQ", "Version 1.0\nDeveloped by Scott Bassett, 2015\ncq.pastcustoms.com", "OK");
+                simpleAlertDialog(
+                        getString(R.string.about_cq_title),
+                        getString(R.string.about_cq_details),
+                        getString(R.string.ok));
                 return true;
             case R.id.menu_copy_url:
                 copyUrl();
@@ -502,9 +507,9 @@ public class ComposeMessageActivity extends ActionBarActivity
     public void copyUrl() {
         String mapUrl = mMessage.mMapUrl;
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("My location", mapUrl);
+        ClipData clip = ClipData.newPlainText(getString(R.string.my_location), mapUrl);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, "URL copied to clipboard", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.url_copied), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -556,8 +561,8 @@ public class ComposeMessageActivity extends ActionBarActivity
             // If still unable to resolve connection by this point, display dialog and disable UI.
             mSmsMessage.setText(getText(R.string.location_unavailable));
             disableUi();
-            mSendMessageButton.setEnabled(false);
-            simpleAlertDialog("Error connecting to Google Play Services", "For some reason, CQ cannot connect to Google Play Services. Unfortunately, this means CQ can't get your location!", "OK");
+            simpleAlertDialog(getString(R.string.error_google_play_title),
+                    getString(R.string.error_google_play_message), getString(R.string.ok));
         }
     }
 
@@ -620,13 +625,13 @@ public class ComposeMessageActivity extends ActionBarActivity
                 || !phoneNumber.matches("[+]??[0-9]{3,15}"));
 
         if (mapUrlInvalid) {
-            Toast.makeText(this, "Error: please update your location", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.toast_invalid_url), Toast.LENGTH_LONG).show();
         } else if (phoneNumberInvalid) {
-            Toast.makeText(this, "Error: please enter a valid phone number", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.toast_invalid_phone), Toast.LENGTH_LONG).show();
         } else {
             // Send message
             sendLocationMessage(phoneNumber, messageText);
-            Toast.makeText(this, "Sending SMS...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_sending_sms), Toast.LENGTH_SHORT).show();
         }
         return;
     }
@@ -638,7 +643,6 @@ public class ComposeMessageActivity extends ActionBarActivity
      * @param messageText the location message to be sent via SMS
      */
     private void sendLocationMessage(String phoneNumber, String messageText) {
-
         Log.d(TAG, "sending SMS");
 
         // Create a new message id

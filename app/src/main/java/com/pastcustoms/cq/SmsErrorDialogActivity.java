@@ -16,9 +16,9 @@ public class SmsErrorDialogActivity extends Activity {
         String message = intent.getStringExtra("error_message");
 
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("Error");
+        alertDialog.setTitle(getString(R.string.error));
         alertDialog.setMessage(message);
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int x) {
                         dialog.dismiss();

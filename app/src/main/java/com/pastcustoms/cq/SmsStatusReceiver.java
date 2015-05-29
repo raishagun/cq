@@ -1,6 +1,5 @@
 package com.pastcustoms.cq;
 
-
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -44,17 +43,23 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                 case Activity.RESULT_OK:
                     // Only display "SMS sent" toast if CQ is in foreground.
                     // todo: debugging code -- remove when no longer necessary:
-                    errorNotification(context, "SMS to " + phoneNumOrName + " was not delivered!", messageId);
+                    String debugErrorMessage = context.getString(R.string.toast_sms_to_)
+                            + phoneNumOrName
+                            + context.getString(R.string.toast__was_not_sent);
+                    errorNotification(context, debugErrorMessage, messageId);
 
                     if (cqIsForeground) {
                         Log.d("CQ receiver", "phoneNumOrName: " + phoneNumOrName);
                         Log.d("CQ receiver", "messageId: " + Integer.toString(messageId));
-                        Toast.makeText(context, "SMS sent to " + phoneNumOrName, Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getString(R.string.toast_sms_sent_to_)
+                                + phoneNumOrName, Toast.LENGTH_LONG).show();
                     }
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
                     // Display error dialog if CQ is in foreground. If not, create a notification.
-                    errorMessage = "SMS to " + phoneNumOrName + " was not sent!";
+                    errorMessage = context.getString(R.string.toast_sms_to_)
+                            + phoneNumOrName
+                            + context.getString(R.string.toast__was_not_sent);
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -62,7 +67,9 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                     }
                     break;
                 default:
-                    errorMessage = "SMS to " + phoneNumOrName + " was not sent!";
+                    errorMessage = context.getString(R.string.toast_sms_to_)
+                            + phoneNumOrName
+                            + context.getString(R.string.toast__was_not_sent);
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -75,11 +82,14 @@ public class SmsStatusReceiver extends BroadcastReceiver {
             switch(getResultCode()) {
                 case Activity.RESULT_OK:
                     if (cqIsForeground) {
-                        Toast.makeText(context, "SMS delivered to " + phoneNumOrName, Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getString(R.string.toast_sms_delivered_to_)
+                                + phoneNumOrName, Toast.LENGTH_LONG).show();
                     }
                     break;
                 default:
-                    errorMessage = "SMS to " + phoneNumOrName + " was not delivered!";
+                    errorMessage = context.getString(R.string.toast_sms_to_)
+                            + phoneNumOrName
+                            + context.getString(R.string.toast__was_not_delivered);
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -89,9 +99,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
         }
     }
 
-    // todo: set high priority for these notifications
     private void errorNotification(Context context, String errorMessage, int messageId) {
-
         // Create pending intent to launch CQ directly from the notification
         Intent startCqIntent = new Intent(context, ComposeMessageActivity.class);
         PendingIntent startCqPendingIntent = PendingIntent.getActivity(
@@ -104,7 +112,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
         // Build notification based on provided error message
         NotificationCompat.Builder mNotificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.alert)
-                .setContentTitle("Location SMS not sent")
+                .setContentTitle(context.getString(R.string.notification_location_sms_not_sent))
                 .setContentText(errorMessage)
                 .setContentIntent(startCqPendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);

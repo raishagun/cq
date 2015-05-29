@@ -2,12 +2,7 @@
     <string name="app_name">CQ</string>
     <string name="title_Activity_Sms_Error_dialog">SMS Error</string>
 
-    <string name="edit_message">Recipient telephone number</string>
-    <string name="button_send">Send</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_display_message">My Message</string>
     <string name="button_copy_url">Copy URL to clipboard</string>
-    <string name="button_pick_contact">Choose contact</string>
     <string name="button_send_message">Send SMS</string>
     <string name="location_unavailable"><i>Location unavailable!</i></string>
     <string name="location_disabled_alert_title">CQ needs to know your location!</string>
@@ -24,8 +19,29 @@
     <string name="prefs_last_display_name">last_display_name</string>
     <string name="button_go_to_settings">Go to Settings</string>
     <string name="button_cancel">Cancel</string>
-    <string name="airplane_mode_alert_title">"Flight mode is on!"</string>
-    <string name="airplane_mode_alert_message">"To send messages with CQ, first disable Flight Mode."</string>
-
+    <string name="airplane_mode_alert_title">Flight mode is on!</string>
+    <string name="airplane_mode_alert_message">To send messages with CQ, first disable Flight Mode.</string>
+    <string name="toast_location_updates_paused">Location updates are now paused</string>
+    <string name="toast_updating_location">Updating your location</string>
+    <string name="about_cq_details">"Version 1.0\nDeveloped by Scott Bassett, 2015\nwww.pastcustoms.com"</string>
+    <string name="about_cq_title">About CQ</string>
+    <string name="ok">OK</string>
+    <string name="my_location">My location</string>
+    <string name="url_copied">URL copied to clipboard</string>
+    <string name="error_google_play_title">Error connecting to Google Play Services</string>
+    <string name="error_google_play_message">CQ cannot connect to Google Play Services. Unfortunately this means CQ cannot get your location!</string>
+    <string name="toast_invalid_url">Error: please update your location</string>
+    <string name="toast_invalid_phone">Error: please enter a valid phone number</string>
+    <string name="toast_sending_sms">Sending SMS...</string>
+    <string name="toast_sms_sent_to_">"SMS sent to "</string>
+    <string name="toast_sms_to_">"SMS to "</string>
+    <string name="toast__was_not_sent">" was not sent!"</string>
+    <string name="toast_sms_delivered_to_">"SMS delivered to "</string>
+    <string name="toast__was_not_delivered">" was not delivered!"</string>
+    <string name="notification_location_sms_not_sent">Location SMS not sent</string>
+    <string name="error">Error</string>
+    <string name="label_send_to">"Send to: "</string>
+    <string name="pick_contact_description">Choose a telephone number from your contacts.</string>
+    <string name="label_message">Message:</string>
 
 </resources>
