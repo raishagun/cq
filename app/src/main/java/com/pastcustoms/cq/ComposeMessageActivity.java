@@ -49,22 +49,22 @@ public class ComposeMessageActivity extends ActionBarActivity
     static final int REQUEST_RESOLVE_CONNECTION_ERROR = 2;
     static final int DESIRED_LOCATION_UPDATE_INTERVAL = 5000; // In milliseconds
     static final int FASTEST_LOCATION_UPDATE_INTERVAL = 1000; // In milliseconds
-    private static final String TAG = "CqApp";
-    protected boolean mCurrentlyResolvingError = false;
-    // UI disabled when sending SMS doesn't make sense
-    protected boolean mUiDisabled = false;
-    // Some (possible out of date) location data is available to display
-    protected boolean mHaveLastLocation = false;
+    static final String TAG = "CqApp";
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
     protected LocationRequest mLocationRequest;
-    protected boolean mRequestingLocationUpdates = true;
     protected EditText mRecipientPhoneNo;
     protected TextView mContactDisplayName;
     protected TextView mSmsMessage;
     protected ImageButton mPickContactButton;
     protected Button mSendMessageButton;
     protected Message mMessage = new Message();
+    private boolean mCurrentlyResolvingError = false;
+    // UI disabled when sending SMS doesn't make sense
+    private boolean mUiDisabled = false;
+    // Some (possible out of date) location data is available to display
+    private boolean mHaveLastLocation = false;
+    private boolean mRequestingLocationUpdates = true;
     private SharedPreferences mSharedPrefs;
     // For TextWatcher to compare against newly-entered phone number, to see if change is genuine
     private String previouslyEnteredPhoneNo;
@@ -79,12 +79,6 @@ public class ComposeMessageActivity extends ActionBarActivity
         mContactDisplayName = (TextView) findViewById(R.id.contact_name);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
         mRecipientPhoneNo = (EditText) findViewById(R.id.phone_no);
-
-        //String lastPhoneNo = mSharedPrefs.getString(getString(R.string.prefs_last_phone_no), "");
-        //mRecipientPhoneNo.setText(lastPhoneNo);
-
-        //String lastDisplayName = mSharedPrefs.getString(getString(R.string.prefs_last_display_name), "");
-        //mContactDisplayName.setText(lastDisplayName);
 
         mSharedPrefs = getSharedPreferences(
                 getString(R.string.shared_prefs_file_key), Context.MODE_PRIVATE);
