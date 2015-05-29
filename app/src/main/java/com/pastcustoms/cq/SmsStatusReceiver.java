@@ -44,7 +44,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                 case Activity.RESULT_OK:
                     // Only display "SMS sent" toast if CQ is in foreground.
                     // todo: debugging code -- remove when no longer necessary:
-                    errorNotification(context, "This is just a test", messageId);
+                    errorNotification(context, "SMS to " + phoneNumOrName + " was not delivered!", messageId);
 
                     if (cqIsForeground) {
                         Log.d("CQ receiver", "phoneNumOrName: " + phoneNumOrName);
@@ -54,7 +54,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
                     // Display error dialog if CQ is in foreground. If not, create a notification.
-                    errorMessage = "SMS to " + phoneNumOrName + " was not sent! Please try again.";
+                    errorMessage = "SMS to " + phoneNumOrName + " was not sent!";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -62,7 +62,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                     }
                     break;
                 default:
-                    errorMessage = "SMS to " + phoneNumOrName + " was not sent! Please try again.";
+                    errorMessage = "SMS to " + phoneNumOrName + " was not sent!";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -79,7 +79,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                     }
                     break;
                 default:
-                    errorMessage = "SMS to " + phoneNumOrName + " was not successfully delivered! Please try again.";
+                    errorMessage = "SMS to " + phoneNumOrName + " was not delivered!";
                     if (cqIsForeground) {
                         errorDialog(context, errorMessage);
                     } else {
@@ -106,7 +106,8 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.alert)
                 .setContentTitle("Location SMS not sent")
                 .setContentText(errorMessage)
-                .setContentIntent(startCqPendingIntent);
+                .setContentIntent(startCqPendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
 
         // Send notification to user (can modify later using messageId)
         NotificationManager mNotificationManager

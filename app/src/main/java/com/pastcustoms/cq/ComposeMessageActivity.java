@@ -644,7 +644,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         // Create a new message id
         int messageId = mSharedPrefs.getInt(getString(R.string.prefs_notification_id), 0);
         ++messageId; // new id is simply old id, incremented
-        messageId = messageId % 100; // start re-using ids once messageId == 100.
+        messageId = messageId % 100; // start re-using ids once messageId reaches 100.
         Log.d(TAG, "MessageId is: " + Integer.toString(messageId));
 
         // Save new message id in shared preferences
