@@ -20,6 +20,10 @@
     <string name="shared_prefs_file_key">com.pastcustoms.cq.PREFERENCE_FILE_KEY</string>
     <string name="prefs_is_foreground_app">is_foreground_app</string>
     <string name="prefs_notification_id">notification_id</string>
+    <string name="prefs_last_phone_no">last_phone_no</string>
+    <string name="prefs_last_display_name">last_display_name</string>
+
+
 
 
 

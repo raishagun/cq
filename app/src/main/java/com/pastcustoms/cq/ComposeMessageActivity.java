@@ -66,6 +66,8 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected Button mSendMessageButton;
     protected Message mMessage = new Message();
     private SharedPreferences mSharedPrefs;
+    // For TextWatcher to compare against newly-entered phone number, to see if change is genuine
+    private String previouslyEnteredPhoneNo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,19 +78,13 @@ public class ComposeMessageActivity extends ActionBarActivity
         mSendMessageButton = (Button) findViewById(R.id.send_message_button);
         mContactDisplayName = (TextView) findViewById(R.id.contact_name);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
-
         mRecipientPhoneNo = (EditText) findViewById(R.id.phone_no);
 
-        TextWatcher textWatcher = new TextWatcher() {
-            public void afterTextChanged(Editable s) {
-                mContactDisplayName.setText("");
-            }
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        };
-        mRecipientPhoneNo.addTextChangedListener(textWatcher);
+        //String lastPhoneNo = mSharedPrefs.getString(getString(R.string.prefs_last_phone_no), "");
+        //mRecipientPhoneNo.setText(lastPhoneNo);
 
-
+        //String lastDisplayName = mSharedPrefs.getString(getString(R.string.prefs_last_display_name), "");
+        //mContactDisplayName.setText(lastDisplayName);
 
         mSharedPrefs = getSharedPreferences(
                 getString(R.string.shared_prefs_file_key), Context.MODE_PRIVATE);
@@ -276,6 +272,29 @@ public class ComposeMessageActivity extends ActionBarActivity
             Log.d(TAG, "mGoogleApiClient connected and requesting updates");
             startLocationUpdates();
         }
+
+        TextWatcher textWatcher = new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                boolean numbersMatch = s.toString().equals(previouslyEnteredPhoneNo);
+
+                // If numbers don't match, clear the currently displayed contact name
+                if (!numbersMatch){
+                    Log.d(TAG, "s is: " + s.toString());
+                    Log.d(TAG, "previouslyEnteredPhoneNo is: " + previouslyEnteredPhoneNo);
+
+                    mContactDisplayName.setText("");
+                }
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // copy phone number as it was before the change.
+                previouslyEnteredPhoneNo = mRecipientPhoneNo.getText().toString();
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+        };
+        mRecipientPhoneNo.addTextChangedListener(textWatcher);
     }
 
     /**
@@ -542,6 +561,7 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     // From tutorial
     // TODO: perform this query with CursorLoader
+
     /**
      * Gets and displays the phone number and 'display name' of a single chosen contact
      */
@@ -553,21 +573,20 @@ public class ComposeMessageActivity extends ActionBarActivity
             String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER,
                     ContactsContract.Contacts.DISPLAY_NAME};
 
-            // CAUTION: The query() method should be called from a separate thread to avoid blocking
-            // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
-            // Consider using CursorLoader to perform the query.
+            // Calling query on main thread (rather than via CursorLoader) because only getting
+            // details for one contact.
             Cursor cursor = getContentResolver()
                     .query(contactUri, projection, null, null, null);
             cursor.moveToFirst();
 
-            // Retrieve the phone number from the NUMBER column
+            // Get contact's phone number and display name.
             int phoneColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
             String number = cursor.getString(phoneColumn);
 
             int nameColumn = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
             String name = cursor.getString(nameColumn);
 
-            // Display chosen number
+            // Display contact's phone number
             mRecipientPhoneNo.setText(number);
 
             // Display contact's display name
