@@ -48,6 +48,7 @@ public class SmsStatusReceiver extends BroadcastReceiver {
 
                     if (cqIsForeground) {
                         Log.d("CQ receiver", "phoneNumOrName: " + phoneNumOrName);
+                        Log.d("CQ receiver", "messageId: " + Integer.toString(messageId));
                         Toast.makeText(context, "SMS sent to " + phoneNumOrName, Toast.LENGTH_LONG).show();
                     }
                     break;

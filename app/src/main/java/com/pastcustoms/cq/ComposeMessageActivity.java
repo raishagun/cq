@@ -645,6 +645,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         int messageId = mSharedPrefs.getInt(getString(R.string.prefs_notification_id), 0);
         ++messageId; // new id is simply old id, incremented
         messageId = messageId % 100; // start re-using ids once messageId == 100.
+        Log.d(TAG, "MessageId is: " + Integer.toString(messageId));
 
         // Save new message id in shared preferences
         SharedPreferences.Editor editor = mSharedPrefs.edit();
@@ -671,10 +672,10 @@ public class ComposeMessageActivity extends ActionBarActivity
         smsSent.putExtra("MSG_ID", messageId);
         smsDelivery.putExtra("MSG_ID", messageId);
 
-        PendingIntent smsSentIntent
-                = PendingIntent.getBroadcast(getBaseContext(), 0, smsSent, 0);
-        PendingIntent smsDeliveryIntent
-                = PendingIntent.getBroadcast(getBaseContext(), 0, smsDelivery, 0);
+        PendingIntent smsSentIntent = PendingIntent.getBroadcast(
+                this, messageId, smsSent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent smsDeliveryIntent = PendingIntent.getBroadcast(
+                this, messageId, smsDelivery, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Send SMS
         SmsManager smsManager = SmsManager.getDefault();
