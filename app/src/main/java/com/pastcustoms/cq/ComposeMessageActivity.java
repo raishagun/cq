@@ -66,8 +66,6 @@ public class ComposeMessageActivity extends ActionBarActivity
     private boolean mHaveLastLocation = false;
     private boolean mRequestingLocationUpdates = true;
     private SharedPreferences mSharedPrefs;
-    // For TextWatcher to compare against newly-entered phone number, to see if change is genuine
-    private String previouslyEnteredPhoneNo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +84,9 @@ public class ComposeMessageActivity extends ActionBarActivity
         buildGoogleApiClient();
     }
 
+    /**
+     * Builds Google API client to connect to location services (provided by Google Play Services).
+     */
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -95,6 +96,10 @@ public class ComposeMessageActivity extends ActionBarActivity
         createLocationRequest();
     }
 
+    /**
+     * Creates a location request, specifying the accuracy and frequency of location data
+     * to request from the fused location provider.
+     */
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(DESIRED_LOCATION_UPDATE_INTERVAL);
@@ -110,24 +115,24 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     @Override
     public void onConnected(Bundle bundle) {
-        // Get the last known location, if available.
+        // Get the last known location, if available
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-        // If last known location available, create location message and update UI.
+        // If last known location available, create location message and update UI
         if (mLastLocation != null) {
             mMessage.update(mLastLocation);
             mHaveLastLocation = true;
             updateUI();
         }
-
+        // If requesting location updates (i.e. updates are not paused), start location updates
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
     }
 
     /**
-     * Disables the 'Send SMS' button and sets a boolean that results in the 'Resume/Pause updates'
-     * options being hidden from the action bar options menu.
+     * Disables the 'Send SMS' button and sets a boolean (mUiDisabled) that results in
+     * the 'Resume/Pause updates' options being hidden from the action bar options menu.
      */
     private void disableUi() {
         mUiDisabled = true;
@@ -199,7 +204,6 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-
         // If currently attempting to resolve an error, do nothing
         if (mCurrentlyResolvingError) {
             return;
@@ -267,25 +271,18 @@ public class ComposeMessageActivity extends ActionBarActivity
             startLocationUpdates();
         }
 
+        // Watch phone number EditText for changes (i.e., if user manually enters a different
+        // telephone number). If phone number is changed, then remove any Contact Display Name
+        // that was obtained from the address book for the previous telephone number.
         TextWatcher textWatcher = new TextWatcher() {
             public void afterTextChanged(Editable s) {
-                boolean numbersMatch = s.toString().equals(previouslyEnteredPhoneNo);
-
-                // If numbers don't match, clear the currently displayed contact name
-                if (!numbersMatch){
-                    Log.d(TAG, "s is: " + s.toString());
-                    Log.d(TAG, "previouslyEnteredPhoneNo is: " + previouslyEnteredPhoneNo);
-
-                    mContactDisplayName.setText("");
-                }
+                mContactDisplayName.setText("");
             }
-
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // copy phone number as it was before the change.
-                previouslyEnteredPhoneNo = mRecipientPhoneNo.getText().toString();
+                // Don't need this method
             }
-
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Don't need this method
             }
         };
         mRecipientPhoneNo.addTextChangedListener(textWatcher);
@@ -300,65 +297,74 @@ public class ComposeMessageActivity extends ActionBarActivity
      * @param context the current context.
      */
     private void checkPhoneSettings(Context context) {
+        // Check if location services are enabled
         boolean locationEnabled = isLocationEnabled(this);
-        // If location services disabled, display alert dialog
         if (!locationEnabled) {
-            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-            alertDialog.setTitle(getString(R.string.location_disabled_alert_title));
-            alertDialog.setMessage(getString(R.string.location_disabled_alert_message));
-            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Go to Settings",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int x) {
-                            dialog.dismiss();
-                            Intent settingsLocation = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(settingsLocation);
-                        }
-                    });
-            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.location_disabled_alert_dismiss_button),
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int x) {
-                            disableUi();
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+            // If location services disabled, display alert dialog with option to go to settings
+            displaySettingsDialog(
+                    getString(R.string.location_disabled_alert_title),
+                    getString(R.string.location_disabled_alert_message),
+                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 
-            // Disable ui if there is no previous location to show
+            // If location services disabled, disable ui if there is no previous location to show
             if (!mHaveLastLocation) {
                 mSmsMessage.setText(getText(R.string.location_unavailable));
                 disableUi();
             }
         }
 
-        if (locationEnabled && mGoogleApiClient.isConnected() && mUiDisabled) {
-            enableUi();
-        }
-
         // Check if Flight Mode is on
         boolean airplaneModeOn = isAirplaneModeOn(this);
         if (airplaneModeOn) {
-            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-            alertDialog.setTitle("Flight mode is on!");
-            alertDialog.setMessage("To send messages with CQ, first disable Flight Mode.");
-            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Go to Settings",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int x) {
-                            dialog.dismiss();
-                            Intent settingsFlightMode = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
-                            startActivity(settingsFlightMode);
+            // If Flight Mode is on, display alert dialog with option to go to settings
+            displaySettingsDialog(
+                    getString(R.string.airplane_mode_alert_title),
+                    getString(R.string.airplane_mode_alert_message),
+                    Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+        }
 
-                        }
-                    });
-            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int x) {
-                            disableUi();
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+        boolean phoneSettingsOk
+                = (locationEnabled && !airplaneModeOn && mGoogleApiClient.isConnected());
+        // If phone settings are OK, then enable UI if it had previously
+        // been disabled for some reason.
+        if (phoneSettingsOk && mUiDisabled) {
+            enableUi();
         }
     }
+
+
+    /**
+     * Displays an alert dialog with the following options:
+     * - Cancel (simply dismisses the dialog)
+     * - Go to Settings (goes to appropriate phone settings page)
+     * @param title the alert dialog title
+     * @param message the alert dialog message
+     * @param settingsActivity the settings activity to start when user clicks 'Go to Settings'
+     *                         e.g., Settings.ACTION_AIRPLANE_MODE_SETTINGS
+     */
+    private void displaySettingsDialog(String title, String message, String settingsActivity) {
+        final String settings = settingsActivity;
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.button_go_to_settings),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int x) {
+                        dialog.dismiss();
+                        Intent settingsIntent = new Intent(settings);
+                        startActivity(settingsIntent);
+                    }
+                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.button_cancel),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int x) {
+                        disableUi();
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
+
 
     /**
      * Helper function to check if user has enabled location access.
@@ -390,13 +396,6 @@ public class ComposeMessageActivity extends ActionBarActivity
             if (locationMode == Settings.Secure.LOCATION_MODE_OFF) {
                 isLocationEnabled = false;
             }
-        }
-
-        // For debugging
-        if (isLocationEnabled) {
-            Log.d(TAG, "Location enabled");
-        } else {
-            Log.d(TAG, "Location disabled");
         }
 
         return isLocationEnabled;
