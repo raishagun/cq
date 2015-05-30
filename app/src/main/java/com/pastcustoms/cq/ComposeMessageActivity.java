@@ -498,10 +498,11 @@ public class ComposeMessageActivity extends ActionBarActivity
                         Toast.LENGTH_LONG).show();
                 return true;
             case R.id.menu_about:
-                simpleAlertDialog(
+                aboutCqDialog(
                         getString(R.string.about_cq_title),
                         getString(R.string.about_cq_details),
-                        getString(R.string.ok));
+                        getString(R.string.ok),
+                        getString(R.string.button_view_license_agreement));
                 return true;
             case R.id.menu_copy_url:
                 copyUrl();
@@ -514,6 +515,36 @@ public class ComposeMessageActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+
+    /**
+     * Creates and shows a basic alert dialog based on the provided input.
+     *
+     * @param title      the title for the alert dialog
+     * @param message    the alert dialog's message
+     * @param okBtn the text for the single button that dismisses the dialog
+     * @param viewLicenseBtn the text for the button to view the license agreement
+     */
+    private void aboutCqDialog(String title, String message, String okBtn, String viewLicenseBtn) {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, okBtn,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int x) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, viewLicenseBtn,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int x) {
+                        Intent legalInfoIntent = new Intent(getApplicationContext(), LegalInfoActivity.class);
+                        legalInfoIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        getApplicationContext().startActivity(legalInfoIntent);
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
 
     /**
      * Creates and shows a basic alert dialog based on the provided input.

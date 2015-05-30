@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pastcustoms.cq" >
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.SEND_SMS"/>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
     <uses-feature
         android:name="android.hardware.location"
-        android:required="true"/>
+        android:required="true" />
     <uses-feature
         android:name="android.hardware.location.gps"
-        android:required="false"/>
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.telephony"
-        android:required="true"/>
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -28,18 +30,22 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".SmsStatusReceiver">
+        <receiver android:name=".SmsStatusReceiver" >
             <intent-filter>
-                <action android:name="com.pastcustoms.cq.SMS_SENT"/>
-                <action android:name="com.pastcustoms.cq.SMS_DELIVERED"/>
+                <action android:name="com.pastcustoms.cq.SMS_SENT" />
+                <action android:name="com.pastcustoms.cq.SMS_DELIVERED" />
             </intent-filter>
         </receiver>
 
         <activity
             android:name=".SmsErrorDialogActivity"
             android:label="@string/title_Activity_Sms_Error_dialog"
-            android:theme="@android:style/Theme.NoDisplay">
+            android:theme="@android:style/Theme.NoDisplay" >
         </activity>
-
+        <activity
+            android:name=".LegalInfoActivity"
+            android:label="@string/title_activity_legal_info">
+        </activity>
     </application>
+
 </manifest>
