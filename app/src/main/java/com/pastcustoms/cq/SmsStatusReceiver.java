@@ -16,9 +16,12 @@ public class SmsStatusReceiver extends BroadcastReceiver {
 
     private SharedPreferences mSharedPrefs;
 
-    // Check if ComposeMessageActivity is running. If so, show error dialog; if not,
-    // send notification.
-
+    /**
+     * Parse the status of a sent SMS, as broadcasted by SmsManager. If CQ is running as the
+     * foreground app, then display success/failure info to user via toast or alertDialog. If CQ
+     * is not running in the foreground, and if there was an error sending/delivering the message,
+     * then issue a notification to the user (as per Google's design guidelines).
+     */
     @Override
     public void onReceive(Context context, Intent intent){
 
@@ -29,13 +32,12 @@ public class SmsStatusReceiver extends BroadcastReceiver {
         boolean cqIsForeground = mSharedPrefs.getBoolean(
                 context.getString(R.string.prefs_is_foreground_app), false);
 
-        String actionName = intent.getAction();
-
         Bundle extras = intent.getExtras();
         String phoneNumOrName = extras.getString("PHONE_OR_NAME");
-
         int messageId = intent.getIntExtra("MSG_ID", 0);
+
         String errorMessage;
+        String actionName = intent.getAction();
 
         if (actionName.equals("com.pastcustoms.cq.SMS_SENT")){
             switch(getResultCode()) {
@@ -62,6 +64,9 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                     }
                     break;
                 default:
+                    // If SMS was not sent successfully, display error dialog if CQ is the
+                    // foreground app, otherwise send an error notification (as per Google's
+                    // design guidelines).
                     errorMessage = context.getString(R.string.toast_sms_to_)
                             + phoneNumOrName
                             + context.getString(R.string.toast__was_not_sent);
@@ -94,6 +99,13 @@ public class SmsStatusReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * Create an error notification, and issue this notification to the user.
+     * Called when CQ is not the foreground app, and thus toasts/alertDialogs are not appropriate.
+     * @param context the current context
+     * @param errorMessage the content of the error message
+     * @param messageId to distinguish notifications (and their pending intents) from one another
+     */
     private void errorNotification(Context context, String errorMessage, int messageId) {
         // Create pending intent to launch CQ directly from the notification
         Intent startCqIntent = new Intent(context, ComposeMessageActivity.class);
@@ -118,6 +130,12 @@ public class SmsStatusReceiver extends BroadcastReceiver {
         mNotificationManager.notify(messageId, mNotificationBuilder.build());
     }
 
+    /**
+     * Start a new invisible activity which will show an alertDialog to the user.
+     * It is necessary to start a new activity because BroadcastReceivers cannot show alertDialogs.
+     * @param context the current context
+     * @param message the message to display in the dialog
+     */
     private void errorDialog(Context context, String message) {
         Intent smsErrorDialogIntent = new Intent(context, SmsErrorDialogActivity.class);
         smsErrorDialogIntent.putExtra("error_message", message);
