@@ -30,11 +30,11 @@ public class Message {
         String latLong = latitude + "," + longitude;
 
         // Build Google Maps URL
-        mMapUrl = "http://maps.google.com/maps?ll=" + latLong + "&q=" + latLong + "&z=15";
+        mMapUrl = "http://maps.google.com/maps?q=" + latLong + "&z=15";
 
         // Build complete message
         mMessageText = MessageFormat.format(
-                "I am within about {0} meters of here:\n{1}\n(Updated {2} my time)",
+                "I am roughly within {0} meters of here:\n{1}\n(Updated {2} my time)",
                 accuracyRounded, mMapUrl, lastUpdated);
     }
 }

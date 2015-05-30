@@ -5,8 +5,8 @@ package com.pastcustoms.cq;
  */
 public class DevOptions {
     // set to false to strip out all debugging log statements
-    static final boolean LOG = true;
+    static final boolean LOG = false;
 
     // set to false to strip out all debugging code (e.g. creating fake notifications, etc.)
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 }
