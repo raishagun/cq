@@ -27,7 +27,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -257,7 +256,9 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     @Override
     public void onResume() {
-        Log.d(TAG, "onResume called");
+        if (DevOptions.LOG) {
+            Log.d(TAG, "onResume called");
+        }
         super.onResume();
 
         // Record in shared preferences that CQ is foreground app
@@ -275,7 +276,9 @@ public class ComposeMessageActivity extends ActionBarActivity
         // If connected to Google API client and requesting updates (i.e. user has not selected
         // the 'pause location updates' option from menu), then start location updates.
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            Log.d(TAG, "mGoogleApiClient connected and requesting updates");
+            if (DevOptions.LOG) {
+                Log.d(TAG, "mGoogleApiClient connected and requesting updates");
+            }
             startLocationUpdates();
         }
 
@@ -664,13 +667,17 @@ public class ComposeMessageActivity extends ActionBarActivity
      * @param messageText the location message to be sent via SMS
      */
     private void sendLocationMessage(String phoneNumber, String messageText) {
-        Log.d(TAG, "sending SMS");
+        if (DevOptions.LOG) {
+            Log.d(TAG, "Sending SMS");
+        }
 
         // Create a new message id
         int messageId = mSharedPrefs.getInt(getString(R.string.prefs_notification_id), 0);
         ++messageId; // new id is simply old id, incremented
         messageId = messageId % 100; // start re-using ids once messageId reaches 100.
-        Log.d(TAG, "MessageId is: " + Integer.toString(messageId));
+        if (DevOptions.LOG) {
+            Log.d(TAG, "MessageId is: " + Integer.toString(messageId));
+        }
 
         // Save new message id in shared preferences
         SharedPreferences.Editor editor = mSharedPrefs.edit();
@@ -684,7 +691,9 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         // Report SMS status using contact name, if available (more readable than phone number)
         String contactName = mContactDisplayName.getText().toString();
-        Log.d(TAG, "contact name is: " + contactName);
+        if (DevOptions.LOG) {
+            Log.d(TAG, "Contact name is: " + contactName);
+        }
 
         if (contactName.equals("")) {
             smsSent.putExtra("PHONE_OR_NAME", phoneNumber);

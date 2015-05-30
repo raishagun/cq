@@ -42,17 +42,24 @@ public class SmsStatusReceiver extends BroadcastReceiver {
             switch(getResultCode()) {
                 case Activity.RESULT_OK:
                     // Only display "SMS sent" toast if CQ is in foreground.
-                    // todo: debugging code -- remove when no longer necessary:
-                    String debugErrorMessage = context.getString(R.string.toast_sms_to_)
-                            + phoneNumOrName
-                            + context.getString(R.string.toast__was_not_sent);
-                    errorNotification(context, debugErrorMessage, messageId);
-
                     if (cqIsForeground) {
-                        Log.d("CQ receiver", "phoneNumOrName: " + phoneNumOrName);
-                        Log.d("CQ receiver", "messageId: " + Integer.toString(messageId));
                         Toast.makeText(context, context.getString(R.string.toast_sms_sent_to_)
                                 + phoneNumOrName, Toast.LENGTH_LONG).show();
+                    }
+
+                    if (DevOptions.LOG) {
+                        Log.d("CQ SMS Status Receiver",
+                                "phoneNumOrName: " + phoneNumOrName);
+                        Log.d("CQ SMS Status Receiver",
+                                "messageId: " + Integer.toString(messageId));
+                    }
+
+                    // FOR DEBUGGING: display fake notification that SMS was not sent
+                    if (DevOptions.DEBUG) {
+                        String debugErrorMessage = context.getString(R.string.toast_sms_to_)
+                                + phoneNumOrName
+                                + context.getString(R.string.toast__was_not_sent);
+                        errorNotification(context, debugErrorMessage, messageId);
                     }
                     break;
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
