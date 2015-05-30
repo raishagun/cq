@@ -9,8 +9,6 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
         android:orientation="vertical">
 
     <LinearLayout
@@ -40,11 +38,14 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/phone_and_contact"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp">
+            android:paddingRight="10dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <EditText
                 android:id="@+id/phone_no"
@@ -76,7 +77,6 @@
             android:textColor="@color/primary_text"
             android:textSize="@dimen/abc_text_size_large_material"/>
 
-
         <TextView
             android:id="@+id/full_message"
             android:layout_width="match_parent"
@@ -84,12 +84,9 @@
             android:layout_margin="10dp"
             android:autoLink="all"
             android:background="#ffffffff"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
             android:padding="10dp"
             android:textColor="@color/primary_text"
             android:textColorLink="@color/accent"
-            android:textIsSelectable="true"
             android:textSize="18sp"/>
 
         <RelativeLayout
@@ -110,7 +107,6 @@
 
         </RelativeLayout>
 
-
-
     </LinearLayout>
+
 </ScrollView>

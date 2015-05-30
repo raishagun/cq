@@ -22,9 +22,13 @@ import android.telephony.SmsManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethod;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -67,7 +71,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     private boolean mUiDisabled = false;
     // Some (possibly out of date) location data is available to display
     private boolean mHaveLastLocation = false;
-    private boolean mRequestingLocationUpdates = true;
+    private boolean mRequestingLocationUpdates = true; // False when user pauses updates
     private SharedPreferences mSharedPrefs;
 
     @Override
@@ -80,6 +84,23 @@ public class ComposeMessageActivity extends ActionBarActivity
         mContactDisplayName = (TextView) findViewById(R.id.contact_name);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
         mRecipientPhoneNo = (EditText) findViewById(R.id.phone_no);
+
+        // Add a listener to the phone number EditText that clears focus (i.e. removes cursor)
+        // when the user is done editing the phone number.
+        mRecipientPhoneNo.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE){
+                    mRecipientPhoneNo.clearFocus();
+                    // Close the soft keyboard
+                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(
+                            Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(mRecipientPhoneNo.getWindowToken(),
+                            0);
+                }
+                return true;
+            }
+        });
 
         mSharedPrefs = getSharedPreferences(
                 getString(R.string.shared_prefs_file_key), Context.MODE_PRIVATE);
