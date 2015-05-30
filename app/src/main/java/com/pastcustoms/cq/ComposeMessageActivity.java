@@ -266,6 +266,15 @@ public class ComposeMessageActivity extends ActionBarActivity
         editor.putBoolean(getString(R.string.prefs_is_foreground_app), true);
         editor.commit();
 
+        // Retrieve the user's units preferences (i.e., metric or imperial), and configure
+        // Message object as appropriate (so that accuracy is expressed in preferred units)
+        Boolean preferMetric
+                = mSharedPrefs.getBoolean(getString(R.string.prefs_prefer_metric), true);
+        // Message objects by default use metric. Only change if user doesn't prefer metric
+        if (!preferMetric) {
+            mMessage.preferMetric(false);
+        }
+
         // Provisionally enable UI. The UI will be disabled if subsequent check of phone settings
         // reveals any problems (e.g., airplane mode is on)
         enableUi();
@@ -497,6 +506,9 @@ public class ComposeMessageActivity extends ActionBarActivity
             case R.id.menu_copy_url:
                 copyUrl();
                 return true;
+            case R.id.menu_change_units:
+                changeUnits();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -534,6 +546,25 @@ public class ComposeMessageActivity extends ActionBarActivity
         ClipData clip = ClipData.newPlainText(getString(R.string.my_location), mapUrl);
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, getString(R.string.url_copied), Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Changes the user's units preference (meters or feet), and saves this preference in
+     * shared preferences. Updates the Message object with this new preference.
+     */
+    private void changeUnits() {
+        // Get existing preference. Preference is a boolean, where true means 'prefers metric'
+        Boolean oldPreference
+                = mSharedPrefs.getBoolean(getString(R.string.prefs_prefer_metric), true);
+
+        // Change preference
+        Boolean newPreference = !oldPreference;
+        SharedPreferences.Editor editor = mSharedPrefs.edit();
+        editor.putBoolean(getString(R.string.prefs_prefer_metric), newPreference);
+        editor.commit();
+
+        // Update Message object
+        mMessage.preferMetric(newPreference);
     }
 
     /**

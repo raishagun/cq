@@ -10,6 +10,7 @@
     <string name="location_disabled_alert_dismiss_button">OK</string>
     <string name="menu_pause_location_updates">Pause location updates</string>
     <string name="menu_resume_location_updates">Resume location updates</string>
+    <string name="menu_change_units">Change units (feet/meters)</string>
     <string name="menu_copy_url">Copy URL to clipboard</string>
     <string name="menu_about">About CQ</string>
     <string name="shared_prefs_file_key">com.pastcustoms.cq.PREFERENCE_FILE_KEY</string>
@@ -17,6 +18,7 @@
     <string name="prefs_notification_id">notification_id</string>
     <string name="prefs_last_phone_no">last_phone_no</string>
     <string name="prefs_last_display_name">last_display_name</string>
+    <string name="prefs_prefer_metric">prefer_metric</string>
     <string name="button_go_to_settings">Go to Settings</string>
     <string name="button_cancel">Cancel</string>
     <string name="airplane_mode_alert_title">Flight mode is on!</string>
