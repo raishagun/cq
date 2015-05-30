@@ -62,17 +62,6 @@ public class SmsStatusReceiver extends BroadcastReceiver {
                         errorNotification(context, debugErrorMessage, messageId);
                     }
                     break;
-                case SmsManager.RESULT_ERROR_RADIO_OFF:
-                    // Display error dialog if CQ is in foreground. If not, create a notification.
-                    errorMessage = context.getString(R.string.toast_sms_to_)
-                            + phoneNumOrName
-                            + context.getString(R.string.toast__was_not_sent);
-                    if (cqIsForeground) {
-                        errorDialog(context, errorMessage);
-                    } else {
-                        errorNotification(context, errorMessage, messageId);
-                    }
-                    break;
                 default:
                     errorMessage = context.getString(R.string.toast_sms_to_)
                             + phoneNumOrName
