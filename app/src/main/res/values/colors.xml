@@ -10,10 +10,8 @@
     <color name="primary_text">#212121</color>
     <color name="secondary_text">#727272</color>
     <color name="divider">#B6B6B6</color>
-
     <color name="message_bg">#FFFFFF</color>
     <color name="warning_banner">#A92D46</color>
-
     <color name="advisory_banner">#2d47a8</color>
 
 </resources>

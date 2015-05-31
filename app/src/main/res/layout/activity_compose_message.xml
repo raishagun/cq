@@ -1,5 +1,4 @@
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,44 +10,46 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/gps_disabled_advisory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/advisory_banner"
+            android:clickable="true"
+            android:onClick="gpsSettingsClickHandler"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="10dp"
+            android:text="@string/advisory_gps_disabled"
+            android:textColor="@color/text"
+            android:textSize="@dimen/abc_text_size_small_material"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/send_to_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="15dp">
+
             <TextView
-                android:id="@+id/gps_disabled_advisory"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/advisory_banner"
-                android:padding="15dp"
-                android:text="@string/advisory_gps_disabled"
-                android:textColor="@color/text"
-                android:textSize="@dimen/abc_text_size_small_material"
-                android:clickable="true"
-                android:visibility="gone"
-                android:onClick="gpsSettingsClickHandler"/>
+                android:id="@+id/send_to_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_send_to"
+                android:textColor="@color/primary_text"
+                android:textSize="@dimen/abc_text_size_large_material" />
 
-
-    <LinearLayout
-        android:id="@+id/send_to_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="10dp">
-
-        <TextView
-            android:id="@+id/send_to_heading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_send_to"
-            android:textColor="@color/primary_text"
-            android:textSize="@dimen/abc_text_size_large_material"/>
-
-        <TextView
-            android:id="@+id/contact_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/dark_primary"
-            android:freezesText="true"
-            android:textSize="@dimen/abc_text_size_large_material"/>
+            <TextView
+                android:id="@+id/contact_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:freezesText="true"
+                android:textColor="@color/dark_primary"
+                android:textSize="@dimen/abc_text_size_medium_material" />
 
         </LinearLayout>
 
@@ -56,11 +57,11 @@
             android:id="@+id/phone_and_contact_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
             android:focusable="true"
-            android:focusableInTouchMode="true">
+            android:focusableInTouchMode="true"
+            android:orientation="horizontal"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp">
 
             <EditText
                 android:id="@+id/phone_no"
@@ -85,60 +86,63 @@
             android:id="@+id/message_heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
-            android:paddingRight="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="15dp"
             android:text="@string/label_message"
             android:textColor="@color/primary_text"
-            android:textSize="@dimen/abc_text_size_large_material"/>
+            android:textSize="@dimen/abc_text_size_large_material" />
 
         <TextView
             android:id="@+id/full_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
             android:autoLink="all"
             android:background="@color/message_bg"
-            android:padding="10dp"
+            android:padding="5dp"
             android:textColor="@color/primary_text"
             android:textColorLink="@color/accent"
-            android:textSize="@dimen/abc_text_size_medium_material"/>
+            android:textSize="@dimen/abc_text_size_medium_material" />
 
         <TextView
             android:id="@+id/message_accuracy_warning_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
             android:background="@color/warning_banner"
+            android:gravity="center"
             android:padding="5dp"
             android:text="@string/warning_low_accuracy"
             android:textColor="@color/text"
-            android:visibility="gone"
-            android:gravity="center"
-            android:textSize="@dimen/abc_text_size_medium_material"/>
+            android:textSize="@dimen/abc_text_size_small_material"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/message_age_warning_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
             android:background="@color/warning_banner"
+            android:gravity="center"
             android:padding="5dp"
             android:text="@string/warning_old_location"
             android:textColor="@color/text"
-            android:visibility="gone"
-            android:gravity="center"
-            android:textSize="@dimen/abc_text_size_medium_material"/>
+            android:textSize="@dimen/abc_text_size_small_material"
+            android:visibility="gone" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_margin="10dp">
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/send_message_button"
