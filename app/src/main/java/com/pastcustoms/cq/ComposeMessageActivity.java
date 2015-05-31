@@ -46,27 +46,39 @@ import com.google.android.gms.location.LocationServices;
 public class ComposeMessageActivity extends ActionBarActivity
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
+    // Keys for saved instance state bundle
+    private static final String STATE_CURRENTLY_RESOLVING_ERROR = "resolving_error";
+    private static final String STATE_REQUESTING_LOCATION_UPDATES = "requesting_location";
+
     // Request code for picking address book contact
     static final int REQUEST_PICK_CONTACT = 1;
     // Request code for resolving Google API connection error
     static final int REQUEST_RESOLVE_CONNECTION_ERROR = 2;
-    static final int DESIRED_LOCATION_UPDATE_INTERVAL = 5000; // In milliseconds
-    static final int FASTEST_LOCATION_UPDATE_INTERVAL = 1000; // In milliseconds
+    static final int DESIRED_LOCATION_UPDATE_INTERVAL_MS = 5000; // In milliseconds
+    static final int FASTEST_LOCATION_UPDATE_INTERVAL_MS = 1000;
+    //static final long  MESSAGE_AGE_WARNING_THRESHOLD_MS = 3600000; // 3600000ms = 1 hour
+    static final long  MESSAGE_AGE_WARNING_THRESHOLD_MS = 1000; // 3600000ms = 1 hour
+    //static final float MESSAGE_ACCURACY_WARNING_THRESHOLD_METERS = 100f;
+    static final float MESSAGE_ACCURACY_WARNING_THRESHOLD_METERS = 15f;
     static final String TAG = "CqApp"; // Tag for writing to the log
     // Used to decide if "Copy URL to clipboard" button should be shown in menu.
     // Copying to clipboard is only supported in SDK level >= 11
     static final boolean DEVICE_SUPPORTS_COPY_URL = (Build.VERSION.SDK_INT >= 11);
     protected GoogleApiClient mGoogleApiClient;
-    protected Location mLastLocation;
     protected LocationRequest mLocationRequest;
     protected EditText mRecipientPhoneNo;
     protected TextView mContactDisplayName;
     protected TextView mSmsMessage;
+    // Warning banner for if message accuracy < threshold
+    protected TextView mAccuracyWarningBanner;
+    // Warning banner for if message age > threshold
+    protected TextView mMessageAgeWarningBanner;
     protected ImageButton mPickContactButton;
     protected Button mSendMessageButton;
-    protected Message mMessage = new Message();
+    protected Message mMessage;
     private boolean mCurrentlyResolvingError = false;
-    // UI disabled when sending SMS doesn't make sense
+    // UI disabled when sending SMS doesn't make sense.
+    // If true, 'pause updates' and 'resume updates' not shown in menu.
     private boolean mUiDisabled = false;
     // Some (possibly out of date) location data is available to display
     private boolean mHaveLastLocation = false;
@@ -78,11 +90,22 @@ public class ComposeMessageActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose_message);
 
+        // Restore saved instance state
+        if (savedInstanceState != null) {
+            mCurrentlyResolvingError
+                    = savedInstanceState.getBoolean(STATE_CURRENTLY_RESOLVING_ERROR, false);
+            mRequestingLocationUpdates
+                    = savedInstanceState.getBoolean(STATE_REQUESTING_LOCATION_UPDATES, true);
+        }
+
+        mMessage = new Message();
         mPickContactButton = (ImageButton) findViewById(R.id.pick_contact_button);
         mSendMessageButton = (Button) findViewById(R.id.send_message_button);
         mContactDisplayName = (TextView) findViewById(R.id.contact_name);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
         mRecipientPhoneNo = (EditText) findViewById(R.id.phone_no);
+        mAccuracyWarningBanner = (TextView) findViewById(R.id.message_accuracy_warning_banner);
+        mMessageAgeWarningBanner = (TextView) findViewById(R.id.message_age_warning_banner);
 
         // Add a listener to the phone number EditText that clears focus (i.e. removes cursor)
         // when the user is done editing the phone number.
@@ -125,8 +148,8 @@ public class ComposeMessageActivity extends ActionBarActivity
      */
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(DESIRED_LOCATION_UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_LOCATION_UPDATE_INTERVAL);
+        mLocationRequest.setInterval(DESIRED_LOCATION_UPDATE_INTERVAL_MS);
+        mLocationRequest.setFastestInterval(FASTEST_LOCATION_UPDATE_INTERVAL_MS);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
@@ -139,12 +162,14 @@ public class ComposeMessageActivity extends ActionBarActivity
     @Override
     public void onConnected(Bundle bundle) {
         // Get the last known location, if available
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
         // If last known location available, create location message and update UI
-        if (mLastLocation != null) {
-            mMessage.update(mLastLocation);
+        if (lastLocation != null) {
             mHaveLastLocation = true;
+            mMessage.update(lastLocation);
+            checkMessageAccuracy(mMessage);
+            checkMessageAge(mMessage);
             updateUI();
         }
         // If requesting location updates (i.e. updates are not paused), start location updates
@@ -188,15 +213,20 @@ public class ComposeMessageActivity extends ActionBarActivity
     }
 
     /**
-     * Updates the UI by displaying the most recent message (which is held within a Message object).
+     * Updates the UI by displaying the most recent message (which is held within a Message object),
+     * along with any warning banners (e.g., about message accuracy or age)
      */
     protected void updateUI() {
+        // Display the location message generated by, and stored within, the Message object
         mSmsMessage.setText(mMessage.mMessageText);
     }
 
     @Override
     public void onLocationChanged(Location location) {
         mMessage.update(location);
+        // Check the message age and accuracy, and show warning banner as appropriate.
+        checkMessageAge(mMessage);
+        checkMessageAccuracy(mMessage);
         updateUI();
     }
 
@@ -246,6 +276,14 @@ public class ComposeMessageActivity extends ActionBarActivity
 
     }
 
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_CURRENTLY_RESOLVING_ERROR, mCurrentlyResolvingError);
+        outState.putBoolean(STATE_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -279,6 +317,14 @@ public class ComposeMessageActivity extends ActionBarActivity
         // reveals any problems (e.g., airplane mode is on)
         enableUi();
 
+        // Check message quality and show any age/accuracy warning banners
+        // (that is, if a location message is available to display - it might not be if the
+        // fused location provider has no 'last location' and hasn't got its first location yet)
+        if (mHaveLastLocation) {
+            checkMessageAge(mMessage);
+            checkMessageAccuracy(mMessage);
+        }
+
         // Check if user has disabled location services or turned on Flight Mode
         checkPhoneSettings(this);
 
@@ -306,6 +352,34 @@ public class ComposeMessageActivity extends ActionBarActivity
             }
         };
         mRecipientPhoneNo.addTextChangedListener(textWatcher);
+    }
+
+    /**
+     * Checks the age of a message, and displays warnings as appropriate.
+     * If message age > MESSAGE_AGE_WARNING_THRESHOLD_MS, display warning banner
+     * @param mMessage the location message to check
+     */
+    private void checkMessageAge(Message mMessage) {
+        // Check accuracy and show warning banner if accuracy > warning threshold
+        // Check age and show warning banner if age > age threshold
+        if (System.currentTimeMillis() - mMessage.mTime > MESSAGE_AGE_WARNING_THRESHOLD_MS) {
+            mMessageAgeWarningBanner.setVisibility(View.VISIBLE);
+        } else {
+            mMessageAgeWarningBanner.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Checks the age of a message, and displays warnings as appropriate.
+     * If message accuracy > MESSAGE_ACCURACY_WARNING_THRESHOLD_METERS, display warning banner.
+     * @param mMessage the location message to check
+     */
+    private void checkMessageAccuracy(Message mMessage) {
+        if (mMessage.mAccuracy > MESSAGE_ACCURACY_WARNING_THRESHOLD_METERS) {
+            mAccuracyWarningBanner.setVisibility(View.VISIBLE);
+        } else {
+            mAccuracyWarningBanner.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -664,18 +738,34 @@ public class ComposeMessageActivity extends ActionBarActivity
             String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER,
                     ContactsContract.Contacts.DISPLAY_NAME};
 
+            // Get contact information using cursor.
             // Calling query on main thread (rather than via CursorLoader) because only getting
             // details for one contact.
-            Cursor cursor = getContentResolver()
-                    .query(contactUri, projection, null, null, null);
-            cursor.moveToFirst();
+            Cursor cursor = null;
+            String number = "";
+            String name = "";
+            // In a try block to ensure that cursor is always closed, even if an exception thrown
+            try {
+                cursor = getContentResolver()
+                        .query(contactUri, projection, null, null, null);
+                cursor.moveToFirst();
 
-            // Get contact's phone number and display name.
-            int phoneColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-            String number = cursor.getString(phoneColumn);
+                // Get contact's phone number and display name.
+                int phoneColumn = cursor.getColumnIndex(
+                        ContactsContract.CommonDataKinds.Phone.NUMBER);
+                number = cursor.getString(phoneColumn);
 
-            int nameColumn = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-            String name = cursor.getString(nameColumn);
+                int nameColumn = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                name = cursor.getString(nameColumn);
+            } catch (Exception e) {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
 
             // Display contact's phone number
             mRecipientPhoneNo.setText(number);

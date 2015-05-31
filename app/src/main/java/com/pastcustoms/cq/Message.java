@@ -2,10 +2,11 @@ package com.pastcustoms.cq;
 
 import android.location.Location;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 
-public class Message {
+public class Message implements Serializable {
 
     private DateFormat mShortDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
     protected String mMapUrl;
@@ -60,7 +61,7 @@ public class Message {
 
         // Build complete message
         mMessageText = MessageFormat.format(
-                "I am roughly within {0} {1} of here:\n{2}\n(Updated {3} my time)",
+                "I am within roughly {0} {1} of here:\n{2}\n(Updated {3} my time)",
                 accuracyRounded, units, mMapUrl, lastUpdated);
     }
 

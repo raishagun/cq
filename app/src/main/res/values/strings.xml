@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">CQ</string>
     <string name="title_Activity_Sms_Error_dialog">SMS Error</string>
-
     <string name="button_copy_url">Copy URL to clipboard</string>
     <string name="button_send_message">Send SMS</string>
     <string name="location_unavailable"><i>Location unavailable!</i></string>
@@ -26,8 +25,8 @@
     <string name="airplane_mode_alert_message">To send messages with CQ, first disable Flight Mode.</string>
     <string name="toast_location_updates_paused">Location updates are now paused</string>
     <string name="toast_updating_location">Updating your location</string>
-    <string name="about_cq_details">"Version 1.0\nDeveloped by Scott Bassett, 2015\nwww.pastcustoms.com\n\nIcons:\nionicons.com\ngoogle.com/design/icons\n\nBackground pattern:\nsubtlepatterns.com"</string>
     <string name="about_cq_title">About CQ</string>
+    <string name="about_cq_details">"Version 1.0\nDeveloped by Scott Bassett, 2015\nwww.pastcustoms.com\n\nIcons:\nionicons.com\ngoogle.com/design/icons\n\nBackground pattern:\nsubtlepatterns.com"</string>
     <string name="ok">OK</string>
     <string name="my_location">My location</string>
     <string name="url_copied">URL copied to clipboard</string>
@@ -48,5 +47,6 @@
     <string name="label_message">Message:</string>
     <string name="title_activity_legal_info">CQ End-User License Agreement</string>
     <string name="action_settings">Settings</string>
-
+    <string name="warning_low_accuracy">⚠ Location accuracy is low</string>
+    <string name="warning_old_location">⚠ Location more than 1 hour old</string>
 </resources>

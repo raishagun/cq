@@ -54,8 +54,7 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:imeOptions="actionDone"
-                android:inputType="phone"
-                />
+                android:inputType="phone" />
 
             <ImageButton
                 android:id="@+id/pick_contact_button"
@@ -83,23 +82,52 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:autoLink="all"
-            android:background="#ffffffff"
+            android:background="@color/message_bg"
             android:padding="10dp"
             android:textColor="@color/primary_text"
             android:textColorLink="@color/accent"
-            android:textSize="18sp"/>
+            android:textSize="@dimen/abc_text_size_medium_material"/>
+
+        <TextView
+            android:id="@+id/message_accuracy_warning_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@color/warning_banner"
+            android:padding="5dp"
+            android:text="@string/warning_low_accuracy"
+            android:textColor="@color/text"
+            android:visibility="gone"
+            android:gravity="center"
+            android:textSize="@dimen/abc_text_size_medium_material"/>
+
+        <TextView
+            android:id="@+id/message_age_warning_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@color/warning_banner"
+            android:padding="5dp"
+            android:text="@string/warning_old_location"
+            android:textColor="@color/text"
+            android:visibility="gone"
+            android:gravity="center"
+            android:textSize="@dimen/abc_text_size_medium_material"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:layout_margin="10dp">
 
             <Button
                 android:id="@+id/send_message_button"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="false"
                 android:layout_centerHorizontal="true"
                 android:onClick="sendSmsBtnHandler"
                 android:text="@string/button_send_message"
