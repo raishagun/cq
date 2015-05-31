@@ -13,9 +13,16 @@ public class Message implements Serializable {
     protected String mMessageText;
     protected float mAccuracy;
     protected long mTime;
-    protected boolean mPreferMetric = true;
+    protected boolean mPreferMetric;
+    Location mMostRecentLocation;
 
-    protected Message() { }
+    /**
+     * Configure Message object so that accuracy is expressed in preferred units.
+     * @param settingPreferMetric true if user prefers metric, false if user prefers imperial
+     */
+    protected Message(Boolean settingPreferMetric) {
+        mPreferMetric = settingPreferMetric;
+    }
 
     /**
      * Toggle whether the accuracy is expressed in meters or feet
@@ -30,6 +37,9 @@ public class Message implements Serializable {
     }
 
     protected void update(Location mostRecentLocation) {
+        // Keep location for if user changes unit preference and message needs to be rebuilt
+        mMostRecentLocation = mostRecentLocation;
+
         // Get accuracy
         mAccuracy = mostRecentLocation.getAccuracy();
         String accuracyRounded = String.valueOf(Math.round(mAccuracy));
@@ -63,6 +73,15 @@ public class Message implements Serializable {
         mMessageText = MessageFormat.format(
                 "I am within roughly {0} {1} of here:\n{2}\n(Updated {3} my time)",
                 accuracyRounded, units, mMapUrl, lastUpdated);
+    }
+
+
+    /**
+     * Rebuilds the location message. Called when the user changes their unit preferences and the
+     * message needs to be re-written in meters/feet.
+     */
+    protected void rebuild() {
+        update(mMostRecentLocation);
     }
 
 

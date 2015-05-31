@@ -12,6 +12,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -71,6 +72,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     protected TextView mAccuracyWarningBanner;
     // Warning banner for if message age > threshold
     protected TextView mMessageAgeWarningBanner;
+    protected TextView mGpsAdvisoryBanner;
     protected ImageButton mPickContactButton;
     protected Button mSendMessageButton;
     protected Message mMessage;
@@ -96,14 +98,14 @@ public class ComposeMessageActivity extends ActionBarActivity
                     = savedInstanceState.getBoolean(STATE_REQUESTING_LOCATION_UPDATES, true);
         }
 
-        mMessage = new Message();
-        mPickContactButton = (ImageButton) findViewById(R.id.pick_contact_button);
+        mPickContactButton = (ImageButton) findViewById(R.id.choose_contact_button);
         mSendMessageButton = (Button) findViewById(R.id.send_message_button);
         mContactDisplayName = (TextView) findViewById(R.id.contact_name);
         mSmsMessage = (TextView) findViewById(R.id.full_message);
         mRecipientPhoneNo = (EditText) findViewById(R.id.phone_no);
         mAccuracyWarningBanner = (TextView) findViewById(R.id.message_accuracy_warning_banner);
         mMessageAgeWarningBanner = (TextView) findViewById(R.id.message_age_warning_banner);
+        mGpsAdvisoryBanner = (TextView) findViewById(R.id.gps_disabled_advisory);
 
         // Add a listener to the phone number EditText that clears focus (i.e. removes cursor)
         // when the user is done editing the phone number.
@@ -124,6 +126,12 @@ public class ComposeMessageActivity extends ActionBarActivity
 
         mSharedPrefs = getSharedPreferences(
                 getString(R.string.shared_prefs_file_key), Context.MODE_PRIVATE);
+
+        // Get user's measurement unit preferences (meters or feet), and create a new
+        // Message object with those preferences.
+        Boolean settingPreferMetric
+                = mSharedPrefs.getBoolean(getString(R.string.prefs_prefer_metric), true);
+        mMessage = new Message(settingPreferMetric);
 
         buildGoogleApiClient();
     }
@@ -271,9 +279,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         SharedPreferences.Editor editor = mSharedPrefs.edit();
         editor.putBoolean(getString(R.string.prefs_is_foreground_app), false);
         editor.commit();
-
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -302,14 +308,8 @@ public class ComposeMessageActivity extends ActionBarActivity
         editor.putBoolean(getString(R.string.prefs_is_foreground_app), true);
         editor.commit();
 
-        // Retrieve the user's units preferences (i.e., metric or imperial), and configure
-        // Message object as appropriate (so that accuracy is expressed in preferred units)
-        Boolean preferMetric
-                = mSharedPrefs.getBoolean(getString(R.string.prefs_prefer_metric), true);
-        // Message objects by default use metric. Only change if user doesn't prefer metric
-        if (!preferMetric) {
-            mMessage.preferMetric(false);
-        }
+        // Check if GPS is enabled, and display advisory banner if not.
+        checkIfGpsEnabled();
 
         // Provisionally enable UI. The UI will be disabled if subsequent check of phone settings
         // reveals any problems (e.g., airplane mode is on)
@@ -352,6 +352,33 @@ public class ComposeMessageActivity extends ActionBarActivity
             }
         };
         mRecipientPhoneNo.addTextChangedListener(textWatcher);
+    }
+
+    /**
+     * Checks if the GPS is enabled, and if not, displays an advisory banner at the top of the
+     * screen advising the user to enable GPS.
+     */
+    private void checkIfGpsEnabled() {
+        LocationManager locationManager
+                = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        // Show advisory banner if GPS is not enabled
+        if (!gpsEnabled) {
+            mGpsAdvisoryBanner.setVisibility(View.VISIBLE);
+        } else {
+            mGpsAdvisoryBanner.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Handler for the 'settings' button in the 'gps disabled' advisory banner (which appears if
+     * the user does not have GPS enabled)
+     * @param view
+     */
+    public void gpsSettingsClickHandler(View view) {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        startActivity(intent);
     }
 
     /**
@@ -492,7 +519,6 @@ public class ComposeMessageActivity extends ActionBarActivity
                 isLocationEnabled = false;
             }
         }
-
         return isLocationEnabled;
     }
 
@@ -583,6 +609,8 @@ public class ComposeMessageActivity extends ActionBarActivity
                 return true;
             case R.id.menu_change_units:
                 changeUnits();
+                mMessage.rebuild();
+                updateUI();
                 return true;
         }
 
@@ -772,7 +800,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
-    public void sendSmsBtnHandler(View view) {
+    public void sendSmsButtonHandler(View view) {
         prepareLocationMessage();
     }
 

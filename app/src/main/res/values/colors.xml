@@ -14,4 +14,6 @@
     <color name="message_bg">#FFFFFF</color>
     <color name="warning_banner">#A92D46</color>
 
+    <color name="advisory_banner">#2d47a8</color>
+
 </resources>

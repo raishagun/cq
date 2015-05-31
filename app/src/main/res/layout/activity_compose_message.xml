@@ -6,12 +6,27 @@
     android:background="@drawable/gridnoise_repeating">
 
     <LinearLayout
-        android:id="@+id/header"
+        android:id="@+id/main_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/gps_disabled_advisory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/advisory_banner"
+                android:padding="15dp"
+                android:text="@string/advisory_gps_disabled"
+                android:textColor="@color/text"
+                android:textSize="@dimen/abc_text_size_small_material"
+                android:clickable="true"
+                android:visibility="gone"
+                android:onClick="gpsSettingsClickHandler"/>
+
+
     <LinearLayout
+        android:id="@+id/send_to_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -20,7 +35,7 @@
         android:paddingTop="10dp">
 
         <TextView
-            android:id="@+id/header_text"
+            android:id="@+id/send_to_heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/label_send_to"
@@ -38,7 +53,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/phone_and_contact"
+            android:id="@+id/phone_and_contact_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -57,21 +72,22 @@
                 android:inputType="phone" />
 
             <ImageButton
-                android:id="@+id/pick_contact_button"
+                android:id="@+id/choose_contact_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/pick_contact_description"
+                android:contentDescription="@string/choose_contact_description"
                 android:onClick="chooseContact"
                 android:src="@drawable/contactsbutton" />
 
         </LinearLayout>
 
         <TextView
-            android:id="@+id/message_header"
+            android:id="@+id/message_heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
+            android:paddingRight="10dp"
             android:text="@string/label_message"
             android:textColor="@color/primary_text"
             android:textSize="@dimen/abc_text_size_large_material"/>
@@ -129,7 +145,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:onClick="sendSmsBtnHandler"
+                android:onClick="sendSmsButtonHandler"
                 android:text="@string/button_send_message"
                 android:textStyle="bold" />
 
