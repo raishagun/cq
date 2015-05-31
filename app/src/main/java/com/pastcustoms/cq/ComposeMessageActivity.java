@@ -303,7 +303,10 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
         super.onResume();
 
-        // Record in shared preferences that CQ is foreground app
+        // Record in shared preferences that CQ is foreground app. Necessary because SMS failures
+        // will be communicated as alertDialogs if CQ is foreground, and as background notifications
+        // if CQ is not foreground, when received by SmsStatusReceiver.  A shared preference is
+        // a no-fuss way of keeping track of this.
         SharedPreferences.Editor editor = mSharedPrefs.edit();
         editor.putBoolean(getString(R.string.prefs_is_foreground_app), true);
         editor.commit();
