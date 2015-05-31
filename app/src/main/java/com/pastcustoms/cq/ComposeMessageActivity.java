@@ -56,10 +56,8 @@ public class ComposeMessageActivity extends ActionBarActivity
     static final int REQUEST_RESOLVE_CONNECTION_ERROR = 2;
     static final int DESIRED_LOCATION_UPDATE_INTERVAL_MS = 5000; // In milliseconds
     static final int FASTEST_LOCATION_UPDATE_INTERVAL_MS = 1000;
-    //static final long  MESSAGE_AGE_WARNING_THRESHOLD_MS = 3600000; // 3600000ms = 1 hour
-    static final long  MESSAGE_AGE_WARNING_THRESHOLD_MS = 1000; // 3600000ms = 1 hour
-    //static final float MESSAGE_ACCURACY_WARNING_THRESHOLD_METERS = 100f;
-    static final float MESSAGE_ACCURACY_WARNING_THRESHOLD_METERS = 15f;
+    static final long MESSAGE_AGE_WARNING_THRESHOLD_MS = 3600000; // 3600000ms = 1 hour
+    static final float MESSAGE_ACCURACY_WARNING_THRESHOLD_METERS = 100f;
     static final String TAG = "CqApp"; // Tag for writing to the log
     // Used to decide if "Copy URL to clipboard" button should be shown in menu.
     // Copying to clipboard is only supported in SDK level >= 11
@@ -112,7 +110,7 @@ public class ComposeMessageActivity extends ActionBarActivity
         mRecipientPhoneNo.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE){
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
                     mRecipientPhoneNo.clearFocus();
                     // Close the soft keyboard
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(
@@ -344,9 +342,11 @@ public class ComposeMessageActivity extends ActionBarActivity
             public void afterTextChanged(Editable s) {
                 mContactDisplayName.setText("");
             }
+
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 // Don't need this method
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Don't need this method
             }
@@ -357,6 +357,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     /**
      * Checks the age of a message, and displays warnings as appropriate.
      * If message age > MESSAGE_AGE_WARNING_THRESHOLD_MS, display warning banner
+     *
      * @param mMessage the location message to check
      */
     private void checkMessageAge(Message mMessage) {
@@ -372,6 +373,7 @@ public class ComposeMessageActivity extends ActionBarActivity
     /**
      * Checks the age of a message, and displays warnings as appropriate.
      * If message accuracy > MESSAGE_ACCURACY_WARNING_THRESHOLD_METERS, display warning banner.
+     *
      * @param mMessage the location message to check
      */
     private void checkMessageAccuracy(Message mMessage) {
@@ -426,13 +428,13 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
-
     /**
      * Displays an alert dialog with the following options:
      * - Cancel (dismisses the dialog and disables the UI)
      * - Go to Settings (goes to appropriate phone settings page)
-     * @param title the alert dialog title
-     * @param message the alert dialog message
+     *
+     * @param title            the alert dialog title
+     * @param message          the alert dialog message
      * @param settingsActivity the settings activity to start when user clicks 'Go to Settings'
      *                         e.g., Settings.ACTION_AIRPLANE_MODE_SETTINGS
      */
@@ -458,7 +460,6 @@ public class ComposeMessageActivity extends ActionBarActivity
                 });
         alertDialog.show();
     }
-
 
     /**
      * Helper function to check if user has enabled location access.
@@ -545,14 +546,13 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
 
         // If device doesn't support copying URL to clipboard, hide this menu option
-        if (!DEVICE_SUPPORTS_COPY_URL){
+        if (!DEVICE_SUPPORTS_COPY_URL) {
             copyUrl.setVisible(false);
         }
 
         // Must return true for the menu to be displayed (see Android API docs)
         return true;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -589,13 +589,12 @@ public class ComposeMessageActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-
     /**
      * Creates and shows a basic alert dialog based on the provided input.
      *
-     * @param title      the title for the alert dialog
-     * @param message    the alert dialog's message
-     * @param okBtn the text for the single button that dismisses the dialog
+     * @param title          the title for the alert dialog
+     * @param message        the alert dialog's message
+     * @param okBtn          the text for the single button that dismisses the dialog
      * @param viewLicenseBtn the text for the button to view the license agreement
      */
     private void aboutCqDialog(String title, String message, String okBtn, String viewLicenseBtn) {
@@ -639,7 +638,6 @@ public class ComposeMessageActivity extends ActionBarActivity
                 });
         alertDialog.show();
     }
-
 
     /**
      * Copies location URL to clipboard.
@@ -726,7 +724,6 @@ public class ComposeMessageActivity extends ActionBarActivity
         }
     }
 
-
     /**
      * Gets and displays the phone number and 'display name' of a single chosen contact
      */
@@ -750,7 +747,7 @@ public class ComposeMessageActivity extends ActionBarActivity
                         .query(contactUri, projection, null, null, null);
                 cursor.moveToFirst();
 
-                // Get contact's phone number and display name.
+                // Get contact's phone number and display name
                 int phoneColumn = cursor.getColumnIndex(
                         ContactsContract.CommonDataKinds.Phone.NUMBER);
                 number = cursor.getString(phoneColumn);
