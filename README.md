@@ -1,4 +1,4 @@
-CQ: A simple location sharing app for Android. Released under the MIT license, and availabe on the Google Play Store.
+CQ: A simple location sharing app for Android. Released under the MIT license, and available on the Google Play Store.
 
 CQ makes it easy to share your location with someone else, whether or not your smartphone has internet access. CQ automatically creates a message with a link to Google Maps showing your approximate location, which you can share by tapping 'Send SMS'.
 
